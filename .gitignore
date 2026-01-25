@@ -46,6 +46,3 @@ logs/
 Thumbs.db
 .DS_Store
 
-# Project specific
-*.onnx
-insect_model.onnx
