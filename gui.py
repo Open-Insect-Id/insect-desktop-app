@@ -7,7 +7,10 @@ import random
 from preprocess import preprocess_pil_image
 from map_viewer import open_map_in_browser
 
+import config
+
 # Apparence par défaut
+# on pourrait tirer ces valeurs depuis config.THEME mais pour l'instant on garde le comportement existant
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
@@ -25,7 +28,7 @@ class InsectDetectorApp(ctk.CTk):
         self.geo_db = geo_db or {}
 
         # --- UI ---
-        self.title("🦋 Open Insect Identifier")
+        self.title(config.MESSAGES.get("app_title", "Open Insect Identifier"))
         self.geometry("900x600")
         self.minsize(800, 500)
 
@@ -49,20 +52,45 @@ class InsectDetectorApp(ctk.CTk):
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_rowconfigure(4, weight=1)
 
-        self.lbl_logo = ctk.CTkLabel(self.sidebar, text="Open Insect Identifier", font=ctk.CTkFont(size=24, weight="bold"))
+        self.lbl_logo = ctk.CTkLabel(
+            self.sidebar,
+            text=config.MESSAGES.get("app_title", "Open Insect Identifier"),
+            font=ctk.CTkFont(size=24, weight="bold")
+        )
         self.lbl_logo.grid(row=0, column=0, padx=20, pady=(20, 10))
 
-        self.btn_upload = ctk.CTkButton(self.sidebar, text="📁 Charger Image", command=self.upload_image)
+        self.btn_upload = ctk.CTkButton(
+            self.sidebar,
+            text=config.MESSAGES.get("button_upload", "📁 Charger Image"),
+            command=self.upload_image
+        )
         self.btn_upload.grid(row=1, column=0, padx=20, pady=10)
 
-        self.btn_analyze = ctk.CTkButton(self.sidebar, text="🔍 Identifier", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.start_analysis)
+        self.btn_analyze = ctk.CTkButton(
+            self.sidebar,
+            text=config.MESSAGES.get("button_identify", "🔍 Identifier"),
+            fg_color="transparent",
+            border_width=2,
+            text_color=("gray10", "#DCE4EE"),
+            command=self.start_analysis
+        )
         self.btn_analyze.grid(row=2, column=0, padx=20, pady=10)
         self.btn_analyze.configure(state="disabled")
 
-        self.btn_clear = ctk.CTkButton(self.sidebar, text="Effacer", fg_color="#cf3838", hover_color="#9e2b2b", command=self.clear_interface)
+        self.btn_clear = ctk.CTkButton(
+            self.sidebar,
+            text=config.MESSAGES.get("button_clear", "Effacer"),
+            fg_color="#cf3838",
+            hover_color="#9e2b2b",
+            command=self.clear_interface
+        )
         self.btn_clear.grid(row=3, column=0, padx=20, pady=10)
 
-        self.lbl_status = ctk.CTkLabel(self.sidebar, text="Prêt", font=ctk.CTkFont(size=12))
+        self.lbl_status = ctk.CTkLabel(
+            self.sidebar,
+            text=config.MESSAGES.get("ready", "Prêt"),
+            font=ctk.CTkFont(size=12)
+        )
         self.lbl_status.grid(row=5, column=0, padx=20, pady=20)
 
         # Main view
@@ -75,7 +103,10 @@ class InsectDetectorApp(ctk.CTk):
         self.image_frame = ctk.CTkFrame(self.main_view, fg_color=("gray90", "gray16"))
         self.image_frame.grid(row=0, column=0, sticky="nsew", pady=(0, 20))
 
-        self.lbl_image = ctk.CTkLabel(self.image_frame, text="Aucune image sélectionnée")
+        self.lbl_image = ctk.CTkLabel(
+            self.image_frame,
+            text=config.MESSAGES.get("no_image_selected", "Aucune image sélectionnée")
+        )
         self.lbl_image.place(relx=0.5, rely=0.5, anchor="center")
 
         # Frame pour les résultats avec scrolling
@@ -85,46 +116,18 @@ class InsectDetectorApp(ctk.CTk):
         self.result_widgets = []  # Pour stocker les widgets de résultats
 
     def _status_message(self, key):
-        messages = {
-            'model_loaded': [
-                "Modèle chargé ✔ \nprêt à détecter des bestioles",
-                "Modèle prêt \nque la chasse commence!",
-                "Modèle chargé ✔ \nl'IA est éveillée (café consommé)"
-            ],
-            'model_missing': [
-                "Je ne sais pas du tout comment tu as fait pour avoir cette erreur mais le modèle n'est pas chargé ❌",
-                "Modèle absent - il a pris des vacances 🏖️",
-                "Modèle introuvable - il joue à cache-cache 🫣"
-            ],
-            'image_loaded': [
-                "Image chargée - belle prise!",
-                "Image reçue 🖼️ - prépare les loupes",
-                "Image chargée - prêts pour l'analyse!"
-            ],
-            'analysis_start': [
-                "Analyse en cours… L'IA scrute la bestiole 🧐",
-                "On analyse... mets-toi à l'aise, ça prend une coffee break ☕",
-                "Analyse en cours - patience, la science travaille"
-            ],
-            'analysis_done': [
-                "Analyse terminée ✔",
-                "C'est dans la boîte! Résultats prêts 📊",
-            ],
-            'analysis_error': [
-                "Oops - l'analyse a trébuché. L'IA va se faire une tasse de thé ☕",
-                "Erreur durant l'analyse - réessaie ou vérifie l'image.",
-            ],
-            'no_model': [
-                "Aucun modèle chargé. Impossible d'analyser (le modèle a fui).",
-                "Pas de bras, pas de chocolat. Ah non, pas de modèle, pas d'analyse!",
-            ],
-            'ready': [
-                "Prêt",
-                "Prêt - prêt à chasser des insectes!",
-                "Prêt (en mode veille, mais opérationnel)"
-            ]
-        }
-        return random.choice(messages.get(key, [str(key)]))
+        """Récupère un message depuis la configuration.
+
+        Si la valeur correspondante est une liste, on en choisit
+        une au hasard (pour varier les statuts). Sinon, on retourne
+        simplement la chaîne.
+        """
+        msg = config.MESSAGES.get(key)
+        if msg is None:
+            return str(key)
+        if isinstance(msg, (list, tuple)):
+            return random.choice(msg)
+        return msg
 
     def update_status(self, text):
         self.lbl_status.configure(text=text)
@@ -161,7 +164,10 @@ class InsectDetectorApp(ctk.CTk):
         self.current_pil_image = img
 
     def clear_interface(self):
-        self.lbl_image.configure(image=None, text="Aucune image sélectionnée")
+        self.lbl_image.configure(
+            image=None,
+            text=config.MESSAGES.get("no_image_selected", "Aucune image sélectionnée")
+        )
         self.image_path = None
         self.btn_analyze.configure(state="disabled")
         self.clear_results()
@@ -182,9 +188,10 @@ class InsectDetectorApp(ctk.CTk):
         self.clear_results()
         
         # Titre
+        title_text = config.MESSAGES.get("results_title", "🔎 RÉSULTATS DE L'ANALYSE")
         title = ctk.CTkLabel(
             self.result_container,
-            text="🔎 RÉSULTATS DE L'ANALYSE",
+            text=title_text,
             font=ctk.CTkFont(size=16, weight="bold")
         )
         title.pack(pady=(10, 5), anchor="w")
@@ -247,7 +254,8 @@ class InsectDetectorApp(ctk.CTk):
             coordinates = self.geo_db[species_key]
             open_map_in_browser(species_name, coordinates)
         else:
-            print(f"Aucune donnée géographique pour {species_name}")
+            msg = config.MESSAGES.get("geo_missing", "Aucune donnée géographique pour {name}")
+            print(msg.format(name=species_name))
 
     def start_analysis(self):
         if not self.image_path or self.analyzing:
