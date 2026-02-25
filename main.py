@@ -14,6 +14,9 @@ def load_hierarchy(path: Path):
 
             # Correction: rechercher la clé "hierarchy_map" si présente
             hierarchy = data.get("hierarchy_map", data)
+            
+            # Extraire la base de données géographique
+            geo_db = data.get("geo_db", {})
 
             # Trier les clés alphabétiquement pour correspondre à l'ordre des classes du modèle
             species_keys = sorted(list(hierarchy.keys()))
@@ -30,13 +33,14 @@ def load_hierarchy(path: Path):
                 formatted_names.append(display_name)
 
             print(f"Hierarchie chargée: {len(formatted_names)} espèces trouvées.")
-            return formatted_names, hierarchy
+            print(f"Base de données géographique: {len(geo_db)} espèces avec coordonnées.")
+            return formatted_names, hierarchy, geo_db
 
         except Exception as e:
             print(f"Erreur lors de la lecture de la hiérarchie: {e}")
-            return ["unknown"] * 1000, {}
+            return ["unknown"] * 1000, {}, {}
 
-    return ["unknown"] * 1000, {}
+    return ["unknown"] * 1000, {}, {}
 
 
 def main():
@@ -56,10 +60,10 @@ def main():
         input_name = output_name = None
         input_size = (224, 224)
 
-    species_list, hierarchy = load_hierarchy(hierarchy_path)
+    species_list, hierarchy, geo_db = load_hierarchy(hierarchy_path)
 
     # Lancer l'interface en injectant la session et les métadonnées
-    app = InsectDetectorApp(session, input_name, output_name, input_size, species_list)
+    app = InsectDetectorApp(session, input_name, output_name, input_size, species_list, hierarchy, geo_db)
     app.mainloop()
 
 

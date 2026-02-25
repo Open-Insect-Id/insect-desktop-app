@@ -5,13 +5,14 @@ from tkinter import filedialog
 import numpy as np
 import random
 from preprocess import preprocess_pil_image
+from map_viewer import open_map_in_browser
 
 # Apparence par défaut
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
 class InsectDetectorApp(ctk.CTk):
-    def __init__(self, session, input_name, output_name, input_size, insect_species):
+    def __init__(self, session, input_name, output_name, input_size, insect_species, hierarchy=None, geo_db=None):
         super().__init__()
 
         # --- Modèle et métadonnées ---
@@ -20,6 +21,8 @@ class InsectDetectorApp(ctk.CTk):
         self.output_name = output_name
         self.input_size = input_size
         self.insect_species = insect_species or ["unknown"] * 1000
+        self.hierarchy = hierarchy or {}
+        self.geo_db = geo_db or {}
 
         # --- UI ---
         self.title("🦋 Open Insect Identifier")
@@ -75,10 +78,11 @@ class InsectDetectorApp(ctk.CTk):
         self.lbl_image = ctk.CTkLabel(self.image_frame, text="Aucune image sélectionnée")
         self.lbl_image.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.result_frame = ctk.CTkTextbox(self.main_view, font=ctk.CTkFont(family="Courier", size=13))
-        self.result_frame.grid(row=1, column=0, sticky="nsew")
-        self.result_frame.insert("0.0", "Les résultats de l'analyse apparaîtront ici...")
-        self.result_frame.configure(state="disabled")
+        # Frame pour les résultats avec scrolling
+        self.result_container = ctk.CTkScrollableFrame(self.main_view)
+        self.result_container.grid(row=1, column=0, sticky="nsew")
+        
+        self.result_widgets = []  # Pour stocker les widgets de résultats
 
     def _status_message(self, key):
         messages = {
@@ -103,14 +107,12 @@ class InsectDetectorApp(ctk.CTk):
                 "Analyse en cours - patience, la science travaille"
             ],
             'analysis_done': [
-                "Analyse terminée ✔ - verdict ci-dessous",
-                "Terminé ✅ - que la meilleure espèce gagne!",
-                "Analyse finie - résultats prêts 🎉"
+                "Analyse terminée ✔",
+                "C'est dans la boîte! Résultats prêts 📊",
             ],
             'analysis_error': [
                 "Oops - l'analyse a trébuché. L'IA va se faire une tasse de thé ☕",
                 "Erreur durant l'analyse - réessaie ou vérifie l'image.",
-                "L'algorithme a croisé un fil orange - redémarrage conseillé 😅"
             ],
             'no_model': [
                 "Aucun modèle chargé. Impossible d'analyser (le modèle a fui).",
@@ -162,20 +164,103 @@ class InsectDetectorApp(ctk.CTk):
         self.lbl_image.configure(image=None, text="Aucune image sélectionnée")
         self.image_path = None
         self.btn_analyze.configure(state="disabled")
-        self.write_result("En attente d'image...")
+        self.clear_results()
         self.update_status(self._status_message('ready'))
 
-    def write_result(self, text):
-        self.result_frame.configure(state="normal")
-        self.result_frame.delete("0.0", "end")
-        self.result_frame.insert("0.0", text)
-        self.result_frame.configure(state="disabled")
+    def clear_results(self):
+        """Efface tous les widgets de résultats."""
+        for widget in self.result_widgets:
+            widget.destroy()
+        self.result_widgets.clear()
+    
+    def display_results(self, results_data):
+        """Affiche les résultats avec boutons de carte.
+        
+        Args:
+            results_data: Liste de tuples (rank, name, confidence, species_key)
+        """
+        self.clear_results()
+        
+        # Titre
+        title = ctk.CTkLabel(
+            self.result_container,
+            text="🔎 RÉSULTATS DE L'ANALYSE",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        title.pack(pady=(10, 5), anchor="w")
+        self.result_widgets.append(title)
+        
+        separator = ctk.CTkLabel(self.result_container, text="─" * 40)
+        separator.pack(pady=5, anchor="w")
+        self.result_widgets.append(separator)
+        
+        # Afficher chaque résultat
+        for rank, name, conf, species_key in results_data:
+            # Frame pour chaque résultat
+            result_frame = ctk.CTkFrame(self.result_container, fg_color="transparent")
+            result_frame.pack(fill="x", pady=10)
+            self.result_widgets.append(result_frame)
+            
+            # Frame horizontal pour le nom et le bouton carte
+            header_frame = ctk.CTkFrame(result_frame, fg_color="transparent")
+            header_frame.pack(fill="x")
+            
+            # Nom de l'espèce
+            name_label = ctk.CTkLabel(
+                header_frame,
+                text=f"#{rank} {name}",
+                font=ctk.CTkFont(size=14, weight="bold"),
+                anchor="w"
+            )
+            name_label.pack(side="left", padx=5)
+            
+            # Bouton carte (si des données géo existent)
+            has_geo_data = species_key and species_key in self.geo_db
+            if has_geo_data:
+                map_btn = ctk.CTkButton(
+                    header_frame,
+                    text="🗺️",
+                    width=35,
+                    height=28,
+                    font=ctk.CTkFont(size=16),
+                    fg_color="#2fa572",
+                    hover_color="#26885f",
+                    command=lambda n=name, k=species_key: self.open_species_map(n, k)
+                )
+                map_btn.pack(side="left", padx=5)
+            
+            # Barre de progression
+            bar_len = int(conf / 5)
+            bar = "█" * bar_len + "" * (20 - bar_len)
+            
+            progress_label = ctk.CTkLabel(
+                result_frame,
+                text=f"   {conf:.1f}% {bar}",
+                font=ctk.CTkFont(family="Courier", size=13),
+                anchor="w"
+            )
+            progress_label.pack(fill="x", padx=5)
+    
+    def open_species_map(self, species_name, species_key):
+        """Ouvre la carte pour une espèce donnée."""
+        if species_key in self.geo_db:
+            coordinates = self.geo_db[species_key]
+            open_map_in_browser(species_name, coordinates)
+        else:
+            print(f"Aucune donnée géographique pour {species_name}")
 
     def start_analysis(self):
         if not self.image_path or self.analyzing:
             return
         if self.session is None:
-            self.write_result(self._status_message('model_missing'))
+            self.clear_results()
+            error_label = ctk.CTkLabel(
+                self.result_container,
+                text=self._status_message('model_missing'),
+                font=ctk.CTkFont(size=13)
+            )
+            error_label.pack(pady=20)
+            self.result_widgets.append(error_label)
             self.update_status(self._status_message('no_model'))
             return
 
@@ -187,8 +272,7 @@ class InsectDetectorApp(ctk.CTk):
         self.after(50, self._run_inference)
 
 
-
-    # Aide IA pour la correction de la proba
+    
     def _run_inference(self):
         try:
             # Prétraitement
@@ -198,6 +282,8 @@ class InsectDetectorApp(ctk.CTk):
             outputs = self.session.run([self.output_name], {self.input_name: img_arr})
             raw_logits = outputs[0][0] # Ce sont les scores bruts (ex: 4.35, -0.6...)
             
+            # --------------------------------------
+            # Aide IA pour la correction de la proba ici
             # --- CORRECTION : APPLIQUER SOFTMAX ---
             # La formule magique pour transformer les scores en % (0 à 1)
             # On soustrait le max pour la stabilité numérique (éviter d'exploser avec np.exp)
@@ -209,8 +295,8 @@ class InsectDetectorApp(ctk.CTk):
             top_indices = np.argsort(predictions)[::-1][:3]
             top_scores = predictions[top_indices]
             
-            final_text = "🔎 RÉSULTATS DE L'ANALYSE\n" + "-"*30 + "\n\n"
-            
+            # Préparer les données pour l'affichage
+            results_data = []
             for i, (idx, score) in enumerate(zip(top_indices, top_scores)):
                 conf = score * 100 # Maintenant score est entre 0 et 1, donc conf entre 0 et 100
                 
@@ -219,18 +305,32 @@ class InsectDetectorApp(ctk.CTk):
                 else:
                     name = f"Classe {idx} (Hors liste)"
                 
-                # Barre de progression (max 20 caractères)
-                bar_len = int(conf / 5) 
-                bar = "█" * bar_len + "░" * (20 - bar_len)
+                # Trouver la clé de l'espèce dans hierarchy pour accéder à geo_db
+                species_key = None
+                if idx < len(self.insect_species):
+                    # Rechercher la clé correspondante dans hierarchy
+                    for key, info in self.hierarchy.items():
+                        if isinstance(info, dict):
+                            formatted = f"{info.get('genre', '')} {info.get('espece', '')}".strip()
+                            if formatted == name:
+                                species_key = key
+                                break
                 
-                final_text += f"#{i+1} {name}\n"
-                final_text += f"   {conf:.1f}% {bar}\n\n"
+                results_data.append((i+1, name, conf, species_key))
             
-            self.write_result(final_text)
+            # Afficher les résultats avec les boutons de carte
+            self.display_results(results_data)
             self.update_status(self._status_message('analysis_done'))
             
         except Exception as e:
-            self.write_result(f"Erreur: {e}")
+            self.clear_results()
+            error_label = ctk.CTkLabel(
+                self.result_container,
+                text=f"Erreur: {e}",
+                font=ctk.CTkFont(size=13)
+            )
+            error_label.pack(pady=20)
+            self.result_widgets.append(error_label)
             self.update_status(self._status_message('analysis_error'))
             print(f"Erreur inférence: {e}")
             import traceback
