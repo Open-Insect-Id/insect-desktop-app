@@ -6,6 +6,7 @@ import numpy as np
 import random
 from preprocess import preprocess_pil_image
 from map_viewer import open_map_in_browser
+import wikipedia_search
 
 import config
 
@@ -235,6 +236,18 @@ class InsectDetectorApp(ctk.CTk):
                     command=lambda n=name, k=species_key: self.open_species_map(n, k)
                 )
                 map_btn.pack(side="left", padx=5)
+            
+            wiki_btn = ctk.CTkButton(
+                header_frame,
+                text="🔎",
+                width=35,
+                height=28,
+                font=ctk.CTkFont(size=16),
+                fg_color="#9da09f",
+                hover_color="#7f8181",
+                command=lambda n=name, k=species_key: wikipedia_search.search(n)
+            )
+            wiki_btn.pack(side="left", padx=5)
             
             # Barre de progression
             bar_len = int(conf / 5)
