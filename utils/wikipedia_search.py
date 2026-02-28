@@ -4,7 +4,7 @@ Module qui s'occupe des fonctions en lien avec Wikipedia
 
 import webbrowser
 import wikipedia
-from logger import setup_logger
+from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

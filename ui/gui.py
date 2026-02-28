@@ -13,7 +13,7 @@ from utils.gbif_api import get_species_id, get_species_image, get_species_locati
 from utils.logger import setup_logger
 from utils.map_viewer import open_map_in_browser
 from mobile_server.server import IMAGE_QUEUE
-from model import process_image
+from model.model import process_image
 from ui.api_result_frame import ApiResultFrame
 
 logger = setup_logger(__name__)
