@@ -173,4 +173,4 @@ Cette méthode exécute l'app dans l'environnement hôte, où tkinter et les bib
 
 ## 📄 Licence
 
-Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet est sous licence GNU General Public License v3.0 - voir le fichier [LICENSE](LICENSE) pour plus de détails.
