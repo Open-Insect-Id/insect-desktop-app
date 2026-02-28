@@ -1,6 +1,5 @@
 import customtkinter as ctk
 from PIL import Image
-import tkinter as tk
 from tkinter import filedialog
 import numpy as np
 import random
@@ -15,7 +14,7 @@ logger = setup_logger(__name__)
 
 
 # Apparence par défaut
-# on pourrait tirer ces valeurs depuis config.THEME mais pour l'instant on garde le comportement existant
+# On pourrait tirer ces valeurs depuis config.THEME mais pour l'instant, on garde le comportement existant
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
