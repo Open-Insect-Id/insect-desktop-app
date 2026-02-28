@@ -5,6 +5,8 @@ from queue import Empty
 import customtkinter as ctk
 from PIL import Image
 import random
+
+from gbif_api import get_species_image, get_species_id
 from map_viewer import open_map_in_browser
 import wikipedia_search
 from tkinter import filedialog
@@ -362,7 +364,6 @@ class InsectDetectorApp(ctk.CTk):
 
         # instantiate window; it will start server itself
         self.mobile_window = MobileConnectionWindow(self)
-        from mobile_server.server import IMAGE_QUEUE
         self.mobile_image_queue = IMAGE_QUEUE
         self.update_status("Mobile connection window opened")
 
@@ -446,6 +447,13 @@ class InsectDetectorApp(ctk.CTk):
             status = f"Confiance: {avg_conf:.1f}% - {'Fiable ✅' if reliable else 'Incertain ⚠️'}"
             if gbif_info and 'url' in gbif_info:
                 status += f" | GBIF: {gbif_info['url']}"
+
+            computed_insect_name = " ".join(names)
+            species_id = get_species_id(computed_insect_name)
+
+            images = get_species_image(species_id)
+            self.api_images_container.display_images_async(images)
+
             self.update_status(status)
             self.display_results(results_data)
 
