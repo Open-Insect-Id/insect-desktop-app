@@ -312,7 +312,7 @@ class InsectDetectorApp(ctk.CTk):
                 font=ctk.CTkFont(size=12, weight="bold"),
                 fg_color="#5a5c5c",
                 hover_color="#454747",
-                command=lambda n=name: wikipedia_search.search(n)
+                command=lambda n=name: wikipedia_search.open_web_browser_wikipedia_search(n)
             )
             wiki_btn.grid(row=0, column=0, padx=(5, 0))
 

@@ -9,7 +9,7 @@ from logger import setup_logger
 logger = setup_logger(__name__)
 
 
-def summary(text):
+def summarize_wikipedia_page(text) -> str:
     wikipedia.set_lang("fr")
     try:
         summary = wikipedia.summary(text, sentences = 10)
@@ -20,13 +20,13 @@ def summary(text):
         summary = wikipedia.summary(text, sentences = 10)
 
     # TODO Change this to a visual output in the app because RN it's just a debug print
-    print(summary)
+    return summary
 
-def search(text):
+def open_web_browser_wikipedia_search(text):
     lang = "fr"
     wikipedia.set_lang("fr")
     search = wikipedia.search(text, results = 1, suggestion=False)
-    if search == []:
+    if not search:
         lang="en"
         wikipedia.set_lang("en")
         search = wikipedia.search(text, results = 1, suggestion=False)
