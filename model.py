@@ -1,7 +1,9 @@
-import onnxruntime as ort
-import numpy as np
-from PIL import Image
 import json
+
+import numpy as np
+import onnxruntime as ort
+from PIL import Image
+
 import gbif_api
 
 session = None

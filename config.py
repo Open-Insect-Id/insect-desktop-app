@@ -2,7 +2,6 @@
 Configuration de l'application Insect Identifier
 """
 import logging
-
 import os
 from pathlib import Path
 

@@ -1,5 +1,6 @@
-from PIL import Image
 import numpy as np
+from PIL import Image
+
 
 def preprocess_pil_image(pil_image: Image.Image, input_size):
     """Convertit un PIL.Image en array (1, C, H, W) normalisé pour le modèle."""

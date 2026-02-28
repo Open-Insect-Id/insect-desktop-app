@@ -2,14 +2,14 @@
 Main entry point of the project
 """
 
-from pathlib import Path
 import json
+from pathlib import Path
 
-from model import load_model
-from gui import InsectDetectorApp
 from config import *
-
+from gui import InsectDetectorApp
 from logger import setup_logger
+from model import load_model
+
 logger = setup_logger(__name__)
 
 

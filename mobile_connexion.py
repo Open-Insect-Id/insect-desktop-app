@@ -1,4 +1,5 @@
 import logging
+
 import customtkinter as ctk
 import qrcode
 from PIL import Image

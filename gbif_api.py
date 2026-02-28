@@ -1,5 +1,6 @@
 import requests
 
+
 def get_species_id(species_name: str) -> str:
     """GBIF search for species ID."""
     try:
@@ -92,6 +93,9 @@ if __name__ == "__main__":
         image_url = ""
         if "error" not in species_info:
             image_url = get_species_image(species_id[1], species_name)
-        print("Image URL:", image_url)
         locations = get_species_locations(species_id[1])
         print(f"Locations found: {len(locations)}")
+        from map_viewer import create_insect_map, open_map_in_browser
+        map_path = create_insect_map(species_name, locations, "test_map.html")
+        print(f"Map saved to: {map_path}")
+        open_map_in_browser(species_name, locations)
