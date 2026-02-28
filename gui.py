@@ -8,10 +8,10 @@ import customtkinter as ctk
 from PIL import Image
 
 import config
-import wikipedia_search
-from gbif_api import get_species_id, get_species_image, get_species_locations, get_species_info
+from utils import wikipedia_search
+from gbif_api import get_species_id, get_species_image, get_species_locations
 from logger import setup_logger
-from map_viewer import create_insect_map, open_map_in_browser
+from map_viewer import open_map_in_browser
 from mobile_server.server import IMAGE_QUEUE
 from model import process_image
 from utils.api_result_frame import ApiResultFrame
