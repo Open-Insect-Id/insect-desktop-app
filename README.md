@@ -1,81 +1,176 @@
-# Open Insect Id desktop app
+# 🐞 Open Insect ID - Application Desktop
 
-This is the desktop app for our AI model, made in python using Tkinter and CustomTkinter
+Une application desktop intelligente pour l'identification d'insectes utilisant l'intelligence artificielle, développée en Python avec Tkinter et CustomTkinter.
+
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge)
+![Tkinter](https://img.shields.io/badge/Tkinter-Included-orange?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
+## 📋 Description
+
+Open Insect ID est une application desktop qui permet d'identifier les insectes à partir de photos en utilisant un modèle d'IA entraîné. L'application interroge l'API GBIF pour obtenir des informations détaillées sur les espèces identifiées, incluant leur classification taxonomique, des images et des données de distribution géographique.
+
+## ✨ Fonctionnalités
+
+- 🔍 **Identification automatique** : Upload d'images pour identification d'insectes
+- 🌐 **Données GBIF** : Récupération d'informations scientifiques précises
+- 🖼️ **Galerie d'images** : Affichage d'images de l'espèce depuis GBIF
+- 📍 **Carte de distribution** : Visualisation des occurrences géographiques
+- 📖 **Informations détaillées** : Nom scientifique, famille, genre, liens externes
+- 🎨 **Interface moderne** : UI élégante avec CustomTkinter
+
+## 🚀 Installation
+
+### Prérequis
+
+- Python 3.8 ou supérieur
+- Tkinter (inclus dans la plupart des installations Python)
+
+### Étapes d'installation
+
+1. **Clonez le repository :**
+   ```bash
+   git clone https://github.com/Open-Insect-Id/insect-desktop-app.git
+   cd insect-desktop-app
+   ```
+
+2. **Créez un environnement virtuel :**
+   ```bash
+   python -m venv .venv
+   ```
+
+3. **Activez l'environnement virtuel :**
+
+      - Windows :
+         ```bash
+         .venv\Scripts\activate
+         ```
+
+      - Linux / MacOS :
+         ```bash
+         source .venv/bin/activate
+         ```
+
+4. **Installez les dépendances :**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. **Lancez l'application :**
+   ```bash
+   python main.py
+   ```
+
+## 📖 Utilisation
+
+1. Ouvrez l'application
+2. Cliquez sur "Charger une image" pour sélectionner une photo d'insecte
+3. L'IA analyse l'image et propose une identification
+4. Consultez les informations détaillées depuis GBIF :
+   - Nom scientifique et classification
+   - Images de référence
+   - Carte de distribution mondiale
+   - Liens vers des ressources externes
+
+## 🛠️ Architecture
+
+```
+insect-desktop-app/
+├── main.py              # Point d'entrée de l'application
+├── gui.py               # Interface utilisateur principale
+├── model.py             # Intégration du modèle IA
+├── gbif_api.py          # API client pour GBIF
+├── wikipedia_search.py  # Recherche d'informations Wikipedia
+├── map_viewer.py        # Visualisation des cartes
+├── config.py            # Configuration de l'application
+├── logger.py            # Système de logging
+├── preprocess.py        # Prétraitement des images
+├── test_installation.py # Tests d'installation
+├── model/               # Modèle IA entraîné
+│   ├── hierarchy_labels.json
+│   ├── hierarchy_map.json
+│   └── insect_model.onnx
+├── images/              # Ressources graphiques
+├── logs/                # Fichiers de logs
+└── requirements.txt     # Dépendances Python
+```
+
+
+## 🔧 Dépannage
+
+### `ModuleNotFoundError: No module named 'tkinter'`
 
 <details>
-<summary>Troubleshooting</summary>
 
-### ModuleNotFoundError: No module named 'tkinter'
+Si vous rencontrez cette erreur, tkinter n'est pas installé ou disponible dans votre environnement Python.
 
-If you encounter this error when running the app, it means tkinter is not installed or not available in your Python environment.
+Tkinter fait partie de la bibliothèque standard Python, mais sur certains systèmes (surtout Linux), il peut ne pas être inclus par défaut.
 
-Tkinter is part of the standard Python library, but on some systems (especially Linux distributions), it may not be included by default.
+#### Solutions :
 
-#### Solutions:
+1. **Installer tkinter au niveau système (Linux) :**
+   - Ubuntu/Debian : `sudo apt-get install python3-tk`
+   - Fedora : `sudo dnf install python3-tkinter`
+   - Arch : `sudo pacman -S tk`
 
-1. **Install tkinter system-wide (Linux):**
-   - On Ubuntu/Debian: `sudo apt-get install python3-tk`
-   - On Fedora: `sudo dnf install python3-tkinter`
-   - On Arch: `sudo pacman -S tk`
+2. **Exécuter en dehors de VS Code Flatpak :**
+   Si vous utilisez VS Code installé via Flatpak, tkinter peut ne pas être disponible à cause du sandboxing. La version Flatpak de VS Code utilise un environnement Python sandboxé qui n'inclut pas tkinter.
+   - Installez VS Code nativement (pas via Flatpak) pour accéder au Python système avec tkinter.
+   - Lancez l'app directement depuis un terminal hôte en dehors de VS Code (voir tutoriel détaillé ci-dessous).
 
-2. **Run outside of Flatpak VS Code:**
-   If you're using VS Code installed via Flatpak, tkinter may not be available due to sandboxing. The Flatpak version of VS Code uses a sandboxed Python environment that doesn't include tkinter. Try one of the following:
-   - Install VS Code natively (not via Flatpak) to access the system Python with tkinter.
-   - Run the app directly from a host terminal outside of VS Code (see detailed tutorial below).
+3. **Utiliser le Python système :**
+   Assurez-vous d'utiliser le Python système qui a tkinter. Vérifiez avec `python3 -c "import tkinter"`.
 
-3. **Use system Python:**
-   Ensure you're using the system Python that has tkinter. You can check with `python3 -c "import tkinter"`.
+Après installation, recréez l'environnement virtuel si nécessaire.
 
-After installing, recreate the virtual environment if necessary.
+#### Tutoriel détaillé : Exécution depuis un terminal externe sur Linux
 
-#### Detailed Tutorial: Running from an External Terminal on Linux
+Puisque le terminal dans VS Code Flatpak est sandboxé et n'a pas accès à tkinter, vous devez lancer l'app depuis votre terminal système natif. Suivez ces étapes :
 
-Since the terminal inside VS Code Flatpak is sandboxed and doesn't have access to tkinter, you need to run the app from your system's native terminal. Follow these steps:
+1. **Ouvrez un terminal système :**
+   - Appuyez sur `Ctrl + Alt + T` (fonctionne sur la plupart des distributions Linux comme Ubuntu, Fedora, etc.).
+   - Ou cherchez "Terminal" ou "Konsole" dans le menu des applications.
 
-1. **Open a system terminal:**
-   - Press `Ctrl + Alt + T` on your keyboard (this works on most Linux distributions like Ubuntu, Fedora, etc.).
-   - Alternatively, search for "Terminal" or "Konsole" in your applications menu and open it.
-
-2. **Navigate to the project directory:**
-   - Use the `cd` command to change to the directory where the project is located. Replace the path with your actual path:
+2. **Naviguez vers le répertoire du projet :**
+   - Utilisez `cd` pour aller dans le répertoire. Remplacez par votre chemin réel :
      ```
-     cd /insect-desktop-app
+     cd /home/yoann/Documents/GitHub/insect-desktop-app
      ```
-   - You can confirm you're in the right place by running `ls` and checking for files like `main.py` and `requirements.txt`.
+   - Confirmez avec `ls` que vous voyez `main.py` et `requirements.txt`.
 
-3. **Activate the virtual environment (if you created one):**
-   - If you have a `.venv` folder from earlier setup, activate it:
+3. **Activez l'environnement virtuel (si créé) :**
+   - S'il y a un dossier `.venv`, activez-le :
      ```
      source .venv/bin/activate
      ```
-   - Your prompt should change to show `(.venv)` at the beginning, indicating the virtual environment is active.
+   - Votre prompt devrait afficher `(.venv)` au début.
 
-4. **Install dependencies (if not already done):**
-   - If the virtual environment is new or you recreated it, install the required packages:
-     ```
-     pip install -r requirements.txt
-     ```
+4. **Installez les dépendances (si pas fait) :**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-5. **Run the application:**
-   - Execute the main script:
-     ```
-     python main.py
-     ```
-   - The GUI window should open. If you get the tkinter error again, proceed to the next step.
+5. **Lancez l'application :**
+   ```bash
+   python main.py
+   ```
+   - La fenêtre GUI devrait s'ouvrir. Si l'erreur tkinter persiste, passez à l'étape suivante.
 
-6. **If tkinter is still missing:**
-   - Exit the virtual environment with `deactivate`.
-   - Install tkinter on your system (see Solution 1 above).
-   - Recreate the virtual environment to include tkinter:
+6. **Si tkinter manque toujours :**
+   - Quittez l'environnement virtuel : `deactivate`
+   - Installez tkinter sur le système (voir Solution 1).
+   - Recréez l'environnement virtuel :
      ```
      rm -rf .venv
      python -m venv .venv
      source .venv/bin/activate
      pip install -r requirements.txt
      ```
-   - Then run `python main.py` again.
+   - Relancez `python main.py`.
 
-This method runs the app in your host system's environment, where tkinter and GUI libraries are properly accessible.
-
+Cette méthode exécute l'app dans l'environnement hôte, où tkinter et les bibliothèques GUI sont accessibles.
 </details>
 
+## 📄 Licence
+
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
