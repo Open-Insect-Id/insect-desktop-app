@@ -132,7 +132,8 @@ def process_image(image_path: str):
     
     # GBIF
     species_name = f"{names[2]} {names[3]}"
-    info = gbif_api.get_species_info(species_name)
+    species_id = gbif_api.get_species_id(species_name)
+    info = gbif_api.get_species_info(species_id[0])
     
     return {
         'names': names,
