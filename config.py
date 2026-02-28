@@ -32,16 +32,11 @@ MODEL = {
     "default_input_size": (224, 224)
 }
 
-
 MODEL_DIR = Path("model")
 HIERARCHY_PATH = MODEL_DIR / Path("hierarchy_map.json")
 LABELS_PATH = MODEL_DIR / Path("hierarchy_labels.json")
 MODEL_PATH = MODEL_DIR / Path("insect_model.onnx")
 
-# Données
-DATA = {
-    "hierarchy_file": "hierarchy_map.json"
-}
 
 # Résultats
 RESULTS = {
