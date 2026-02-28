@@ -5,8 +5,8 @@ import tempfile
 import webbrowser
 
 import folium
-from folium.plugins import HeatMap
-from folium.plugins import MiniMap
+from folium.plugins import HeatMap, MiniMap
+
 from logger import setup_logger
 
 logger = setup_logger(__name__)

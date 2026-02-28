@@ -5,6 +5,7 @@ charset-normalizer
 colorama
 customtkinter
 darkdetect
+flask
 flatbuffers
 folium
 idna
@@ -15,15 +16,15 @@ numpy
 onnxruntime
 opencv-python
 packaging
+Pillow
+plyer
 protobuf
+qrcode
 requests
 soupsieve
 sympy
 typing_extensions
 urllib3
+Werkzeug
 wikipedia
 xyzservices
-plyer
-flask
-qrcode
-Pillow
