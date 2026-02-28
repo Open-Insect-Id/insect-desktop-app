@@ -70,7 +70,7 @@ def get_species_locations(species_id: str, limit: int = 500) -> list:
     """GBIF occurrence lookup."""
     try:
         occ_url = f"https://api.gbif.org/v1/occurrence/search?taxonKey={species_id}&hasCoordinate=true&limit={limit}"
-        occ_resp = requests.get(occ_url, headers={'User-Agent': 'Insect-ID/1.0'}, timeout=5)
+        occ_resp = requests.get(occ_url, headers={'User-Agent': 'Insect-ID/1.0'}, timeout=10)
         occ_data = occ_resp.json()
 
         logger.debug(f"Occurrence URL: {occ_url}")
