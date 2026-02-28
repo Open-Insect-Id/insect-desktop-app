@@ -152,7 +152,7 @@ class InsectDetectorApp(ctk.CTk):
             frame_height = 300
 
         # Calcul du ratio pour ne pas déformer
-        ratio = min(frame_width/img.width, frame_height/img.height)
+        ratio = min(frame_width / img.width, frame_height / img.height)
         new_size = (int(img.width * ratio), int(img.height * ratio))
 
         self.current_image_tk = ctk.CTkImage(
@@ -319,7 +319,7 @@ class InsectDetectorApp(ctk.CTk):
             # Préparer les données pour l'affichage
             results_data = []
             for i, (idx, score) in enumerate(zip(top_indices, top_scores)):
-                conf = score * 100 # Maintenant score est entre 0 et 1, donc conf entre 0 et 100
+                conf = score * 100  # Maintenant score est entre 0 et 1, donc conf entre 0 et 100
                 
                 if idx < len(self.insect_species):
                     name = self.insect_species[idx]
