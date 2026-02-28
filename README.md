@@ -129,7 +129,7 @@ Puisque le terminal dans VS Code Flatpak est sandboxé et n'a pas accès à tkin
 
 1. **Ouvrez un terminal système :**
    - Appuyez sur `Ctrl + Alt + T` (fonctionne sur la plupart des distributions Linux comme Ubuntu, Fedora, etc.).
-   - Ou cherchez "Terminal" ou "Konsole" dans le menu des applications.
+   - Ou cherchez "Terminal" ou "Console" dans le menu des applications.
 
 2. **Naviguez vers le répertoire du projet :**
    - Utilisez `cd` pour aller dans le répertoire. Remplacez par votre chemin réel :
@@ -173,4 +173,4 @@ Cette méthode exécute l'app dans l'environnement hôte, où tkinter et les bib
 
 ## 📄 Licence
 
-Ce projet est sous licence GPLv3 - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet est sous licence GPLv3 — voir le fichier [LICENSE](LICENSE) pour plus de détails.
