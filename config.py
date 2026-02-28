@@ -3,6 +3,7 @@ Configuration de l'application Insect Identifier
 """
 import logging
 
+import os
 from pathlib import Path
 
 # Thème et apparence
@@ -37,6 +38,15 @@ HIERARCHY_PATH = MODEL_DIR / Path("hierarchy_map.json")
 LABELS_PATH = MODEL_DIR / Path("hierarchy_labels.json")
 MODEL_PATH = MODEL_DIR / Path("insect_model.onnx")
 
+DEFAULT_PATHS_IMAGES = [
+    os.path.expanduser("~/Downloads"),
+    os.path.expanduser("~/Pictures"),
+    os.path.expanduser("~/Documents"),
+    Path(Path(__file__).parent / Path("images"))
+]
+
+# Par défaut, on peut utiliser le dernier dossier de la liste (images dans le projet) pour éviter d'avoir à chercher dans les dossiers personnels
+PATH_IMAGES = DEFAULT_PATHS_IMAGES[-1]
 
 # Résultats
 RESULTS = {

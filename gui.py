@@ -141,7 +141,7 @@ class InsectDetectorApp(ctk.CTk):
     def upload_image(self):
 
         file_path = filedialog.askopenfilename(
-            initialdir = os.path.expanduser("~/Downloads"),
+            initialdir = config.PATH_IMAGES,
             filetypes = [("Images", "*.jpg *.jpeg *.png")]
         )
 
