@@ -16,6 +16,7 @@ def summary(text):
         wikipedia.set_lang("en")
         summary = wikipedia.summary(text, sentences = 10)
 
+    # TODO Change this to a visual outout in the app because RN it's just a debug print
     print(summary)
 
 def search(text):

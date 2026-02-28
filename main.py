@@ -8,6 +8,9 @@ import json
 from model import load_model
 from gui import InsectDetectorApp
 
+from logger import setup_logger
+logger = setup_logger(__name__)
+
 
 def load_hierarchy(path: Path):
     """
@@ -38,12 +41,12 @@ def load_hierarchy(path: Path):
                     display_name = key.replace("_", " ").title()
                 formatted_names.append(display_name)
 
-            print(f"Hierarchie chargée: {len(formatted_names)} espèces trouvées.")
-            print(f"Base de données géographique: {len(geo_db)} espèces avec coordonnées.")
+            logger.debug(f"Hierarchie chargée: {len(formatted_names)} espèces trouvées.")
+            logger.debug(f"Base de données géographique: {len(geo_db)} espèces avec coordonnées.")
             return formatted_names, hierarchy, geo_db
 
         except Exception as e:
-            print(f"Erreur lors de la lecture de la hiérarchie: {e}")
+            logger.error(f"Erreur lors de la lecture de la hiérarchie: {e}")
             return ["unknown"] * 1000, {}, {}
 
     return ["unknown"] * 1000, {}, {}
@@ -60,11 +63,11 @@ def main():
 
     # Charger le modèle synchroniquement au démarrage (souhait de l'utilisateur)
     try:
-        print("Chargement du modèle ONNX (cela peut prendre quelques secondes)...")
+        logger.info("Chargement du modèle ONNX (cela peut prendre quelques secondes)...")
         session, input_name, output_name, input_size = load_model(model_path)
-        print(f"Modèle chargé: input_size={input_size}")
+        logger.debug(f"Modèle chargé: input_size={input_size}")
     except Exception as e:
-        print(f"Attention: échec du chargement du modèle: {e}")
+        logger.warning(f"Attention: échec du chargement du modèle: {e}")
         session = None
         input_name = output_name = None
         input_size = (224, 224)

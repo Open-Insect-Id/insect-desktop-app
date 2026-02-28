@@ -1,6 +1,9 @@
 """
 Configuration de l'application Insect Identifier
 """
+import logging
+
+from pathlib import Path
 
 # Thème et apparence
 THEME = {
@@ -104,3 +107,21 @@ MESSAGES = {
     "results_title": "🔎 RÉSULTATS DE L'ANALYSE",
     "geo_missing": "Aucune donnée géographique pour {name}"
 }
+
+
+LOGGING_LEVELS: dict[str, int] = {
+    "VERBOSE": 5,
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL,
+}
+
+LOGGING_LEVEL_CONSOLE: int = 5  # Verbose
+
+LOGGING_LEVEL_LOGFILES: int = 5  # Verbose
+
+LOGS_DIR = Path("logs")
+
+LOGS_CONSOLE_GLOBALLY = True
