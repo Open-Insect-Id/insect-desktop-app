@@ -4,8 +4,8 @@ import numpy as np
 import onnxruntime as ort
 from PIL import Image
 
-import gbif_api
-from logger import setup_logger
+from utils import gbif_api
+from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
