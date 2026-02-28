@@ -6,6 +6,7 @@ from tkinter import filedialog
 
 import customtkinter as ctk
 from PIL import Image
+from mpmath.libmp.libintmath import ifac2
 
 import config
 from utils import wikipedia_search
@@ -45,6 +46,7 @@ class InsectDetectorApp(ctk.CTk):
         # Etat
         self.image_path = None
         self.current_pil_image = None
+        self.current_image_tk = None
         self.analyzing = False
 
         self.mobile_image_queue = None
@@ -94,12 +96,12 @@ class InsectDetectorApp(ctk.CTk):
             font=ctk.CTkFont(size=14, weight="bold"),
             height=40,
             fg_color="transparent",
+            state="disabled",
             border_width=2,
             text_color=("gray10", "#DCE4EE"),
             command=self.start_analysis
         )
         self.btn_analyze.grid(row=2, column=0, padx=20, pady=10, sticky="ew")
-        self.btn_analyze.configure(state="disabled")
 
         self.btn_clear = ctk.CTkButton(
             self.sidebar,
@@ -107,6 +109,7 @@ class InsectDetectorApp(ctk.CTk):
             fg_color="#cf3838",
             hover_color="#9e2b2b",
             height=35,
+            state="disabled",
             command=self.clear_interface
         )
         self.btn_clear.grid(row=3, column=0, padx=20, pady=10, sticky="ew")
@@ -127,6 +130,7 @@ class InsectDetectorApp(ctk.CTk):
             text="🗺️ View map",
             font=ctk.CTkFont(size=14, weight="bold"),
             height=40,
+            state="disabled",
             fg_color="#1f6aa5",
             hover_color="#195985",
             command=self.open_map,
@@ -215,6 +219,7 @@ class InsectDetectorApp(ctk.CTk):
             self.load_image_for_analysis(file_path, source_label="desktop")
 
     def display_image(self, path):
+        # Load new PIL image
         img = Image.open(path)
         self.update_idletasks()
         frame_width = self.image_frame.winfo_width()
@@ -225,41 +230,66 @@ class InsectDetectorApp(ctk.CTk):
         ratio = min((frame_width - padding) / img.width, (frame_height - padding) / img.height)
         new_size = (int(img.width * ratio), int(img.height * ratio))
 
+        # Create new CTkImage instance
         self.current_image_tk = ctk.CTkImage(
             light_image=img,
             dark_image=img,
             size=new_size
         )
 
+        # Assign it to the label
         self.lbl_image.configure(image=self.current_image_tk, text="")
+
+        # Keep reference to PIL image
         self.current_pil_image = img
+
+        # Force the label to refresh
+        self.lbl_image.update_idletasks()
 
     def load_image_for_analysis(self, image_path, source_label):
         self.image_path = image_path
         self.display_image(image_path)
         self.btn_analyze.configure(state="normal")
+        self.update_clear_btn()
         self.update_status(f"Image ready from {source_label}")
 
     def clear_interface(self):
+        # Remove image reference
         self.lbl_image.configure(
-            image=None,
+            image="",
             text=config.MESSAGES.get("no_image_selected", "Aucune image sélectionnée")
         )
+        # Clear stored references
+        # self.current_image_tk = None
+        # self.current_pil_image = None
         self.image_path = None
+
         self.btn_analyze.configure(state="disabled")
         self.clear_results()
         self.update_status(self._status_message('ready'))
 
+        # Force the label to update internally
+        self.lbl_image.update_idletasks()
+
     def clear_results(self):
-        """Efface tous les widgets de résultats."""
+        """Clears all result widgets"""
+
+        # Clears the 2 bottom right containers (results and images)
         for widget in self.result_scores_container.winfo_children():
             widget.destroy()
         for widget in self.api_images_container.winfo_children():
             widget.destroy()
 
+        # Disables the map and erase buttons (since no results to display)
+        self.update_map_btn()
+        self.update_clear_btn()
+
     def display_results(self, results_data):
         self.clear_results()
         self.show_results_area()
+
+        # If there are results, enable the map and erase buttons
+        self.update_clear_btn()
 
         # Titre des résultats
         title_text = config.MESSAGES.get("results_title", "🔎 RÉSULTATS DE L'ANALYSE")
@@ -359,7 +389,7 @@ class InsectDetectorApp(ctk.CTk):
             row_index += 1
 
     def open_map(self):
-        if not self.insect_species or self.computed_insect_name is None:
+        if not self.has_search_result():
             return
     
         species_name = self.computed_insect_name
@@ -509,3 +539,20 @@ class InsectDetectorApp(ctk.CTk):
             except Exception as e:
                 logger.error("Error closing mobile window: %s", e)
         self.destroy()
+
+    def update_map_btn(self):
+        if self.has_search_result():
+            self.btn_mobile_connect.configure(state="normal")
+        else:
+            self.btn_mobile_connect.configure(state="disabled")
+
+
+    def update_clear_btn(self):
+        if self.image_path:
+            self.btn_clear.configure(state="normal")
+        else:
+            self.btn_clear.configure(state="disabled")
+
+
+    def has_search_result(self):
+        return self.insect_species and (self.computed_insect_name is not None)
