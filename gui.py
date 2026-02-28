@@ -10,6 +10,10 @@ import wikipedia_search
 
 import config
 
+from logger import setup_logger
+logger = setup_logger(__name__)
+
+
 # Apparence par défaut
 # on pourrait tirer ces valeurs depuis config.THEME mais pour l'instant on garde le comportement existant
 ctk.set_appearance_mode("Dark")
@@ -268,7 +272,7 @@ class InsectDetectorApp(ctk.CTk):
             open_map_in_browser(species_name, coordinates)
         else:
             msg = config.MESSAGES.get("geo_missing", "Aucune donnée géographique pour {name}")
-            print(msg.format(name=species_name))
+            logger.warning(msg.format(name=species_name))
 
     def start_analysis(self):
         if not self.image_path or self.analyzing:
@@ -353,9 +357,7 @@ class InsectDetectorApp(ctk.CTk):
             error_label.pack(pady=20)
             self.result_widgets.append(error_label)
             self.update_status(self._status_message('analysis_error'))
-            print(f"Erreur inférence: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Erreur inférence: {e}")
         finally:
             self.analyzing = False
             self.btn_analyze.configure(state="normal")
