@@ -4,7 +4,7 @@ Une application desktop intelligente pour l'identification d'insectes utilisant 
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge)
 ![Tkinter](https://img.shields.io/badge/Tkinter-Included-orange?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![License](https://img.shields.io/badge/License-GPLv3-green?style=for-the-badge)
 
 ## 📋 Description
 
@@ -173,4 +173,4 @@ Cette méthode exécute l'app dans l'environnement hôte, où tkinter et les bib
 
 ## 📄 Licence
 
-Ce projet est sous licence GNU General Public License v3.0 - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet est sous licence GPLv3 - voir le fichier [LICENSE](LICENSE) pour plus de détails.
