@@ -9,9 +9,9 @@ from PIL import Image
 
 import config
 import wikipedia_search
-from gbif_api import get_species_id, get_species_image
+from gbif_api import get_species_id, get_species_image, get_species_locations, get_species_info
 from logger import setup_logger
-from map_viewer import open_map_in_browser
+from map_viewer import create_insect_map, open_map_in_browser
 from mobile_server.server import IMAGE_QUEUE
 from model import process_image
 from utils.api_result_frame import ApiResultFrame
@@ -33,7 +33,9 @@ class InsectDetectorApp(ctk.CTk):
         self.input_size = input_size
         self.insect_species = insect_species or ["unknown"] * 1000
         self.hierarchy = hierarchy or {}
-        self.geo_db = geo_db or {}
+        self.computed_insect_name = None
+        self.species_id = None
+        self.species_info = None
 
         # --- UI ---
         self.title(config.MESSAGES.get("app_title", "Open Insect Identifier"))
@@ -117,6 +119,17 @@ class InsectDetectorApp(ctk.CTk):
             fg_color="#1f6aa5",
             hover_color="#195985",
             command=self.start_mobile_connect,
+        )
+        self.btn_mobile_connect.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
+
+        self.btn_mobile_connect = ctk.CTkButton(
+            self.sidebar,
+            text="🗺️ View map",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=40,
+            fg_color="#1f6aa5",
+            hover_color="#195985",
+            command=self.open_map,
         )
         self.btn_mobile_connect.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
 
@@ -345,6 +358,20 @@ class InsectDetectorApp(ctk.CTk):
 
             row_index += 1
 
+    def open_map(self):
+        if not self.insect_species or self.computed_insect_name is None:
+            return
+    
+        species_name = self.computed_insect_name
+        species_id = get_species_id(species_name)
+        coordinates = get_species_locations(species_id[1]) if species_id else []
+
+        if not coordinates:
+            self.update_status(f"No geographic data available for {species_name}")
+            return
+
+        open_map_in_browser(species_name, coordinates)
+
     # ====== Mobile Integration ======
     def start_mobile_connect(self):
         # if window already exists, just bring to front
@@ -445,8 +472,8 @@ class InsectDetectorApp(ctk.CTk):
             if gbif_info and 'url' in gbif_info:
                 status += f" | GBIF: {gbif_info['url']}"
 
-            computed_insect_name = " ".join(names)
-            species_id = get_species_id(computed_insect_name)
+            self.computed_insect_name = f"{names[0]} {names[1]}".strip()
+            species_id = get_species_id(self.computed_insect_name)
 
             images = get_species_image(species_id)
             self.api_images_container.display_images_async(images)
