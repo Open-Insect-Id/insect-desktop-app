@@ -46,3 +46,4 @@ logs/
 Thumbs.db
 .DS_Store
 
+/mobile_server/uploads
