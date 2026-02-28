@@ -58,13 +58,14 @@ def main():
     """
     base = Path(__file__).parent
 
-    model_path = base / "insect_model.onnx"
-    hierarchy_path = base / "hierarchy_map.json"
+    model_path = base / "model/insect_model.onnx"
+    hierarchy_path = base / "model/hierarchy_map.json"
+    labels_path = base / "model/hierarchy_labels.json"
 
     # Charger le modèle synchroniquement au démarrage (souhait de l'utilisateur)
     try:
         logger.info("Chargement du modèle ONNX (cela peut prendre quelques secondes)...")
-        session, input_name, output_name, input_size = load_model(model_path)
+        session, input_name, output_name, input_size = load_model(model_path, hierarchy_path, labels_path)
         logger.debug(f"Modèle chargé: input_size={input_size}")
     except Exception as e:
         logger.warning(f"Attention: échec du chargement du modèle: {e}")
