@@ -21,3 +21,20 @@ def get_species_info(species_name: str) -> dict:
         }
     except Exception as e:
         return {"error": f"API erreur: {e}"}
+    
+
+
+def get_species_image(species_id: str) -> str:
+    """GBIF media lookup."""
+    try:
+        media_url = f"https://api.gbif.org/v1/species/{species_id}/media"
+        media_resp = requests.get(media_url, headers={'User-Agent': 'Insect-ID/1.0'}, timeout=5)
+        media_data = media_resp.json()
+        
+        for item in media_data.get("results", []):
+            if item.get("type") == "StillImage" and item.get("identifier"):
+                return item["identifier"]
+        
+        return ""
+    except Exception as e:
+        return ""
