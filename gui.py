@@ -6,6 +6,8 @@ import random
 from preprocess import preprocess_pil_image
 from map_viewer import open_map_in_browser
 import wikipedia_search
+from model import process_image
+import webbrowser
 
 import config
 
@@ -206,7 +208,7 @@ class InsectDetectorApp(ctk.CTk):
         self.result_widgets.append(separator)
         
         # Afficher chaque résultat
-        for rank, name, conf, species_key in results_data:
+        for level, name, conf, map_url in results_data:
             # Frame pour chaque résultat
             result_frame = ctk.CTkFrame(self.result_container, fg_color="transparent")
             result_frame.pack(fill="x", pady=10)
@@ -219,14 +221,14 @@ class InsectDetectorApp(ctk.CTk):
             # Nom de l'espèce
             name_label = ctk.CTkLabel(
                 header_frame,
-                text=f"#{rank} {name}",
+                text=f"{level}: {name}",
                 font=ctk.CTkFont(size=14, weight="bold"),
                 anchor="w"
             )
             name_label.pack(side="left", padx=5)
             
             # Bouton carte (si des données géo existent)
-            has_geo_data = species_key and species_key in self.geo_db
+            has_geo_data = map_url is not None
             if has_geo_data:
                 map_btn = ctk.CTkButton(
                     header_frame,
@@ -236,7 +238,7 @@ class InsectDetectorApp(ctk.CTk):
                     font=ctk.CTkFont(size=16),
                     fg_color="#2fa572",
                     hover_color="#26885f",
-                    command=lambda n=name, k=species_key: self.open_species_map(n, k)
+                    command=lambda url=map_url: webbrowser.open(url)
                 )
                 map_btn.pack(side="left", padx=5)
             
@@ -248,7 +250,7 @@ class InsectDetectorApp(ctk.CTk):
                 font=ctk.CTkFont(size=16),
                 fg_color="#9da09f",
                 hover_color="#7f8181",
-                command=lambda n=name, k=species_key: wikipedia_search.search(n)
+                command=lambda n=name: wikipedia_search.search(n)
             )
             wiki_btn.pack(side="left", padx=5)
             
@@ -299,52 +301,30 @@ class InsectDetectorApp(ctk.CTk):
     
     def _run_inference(self):
         try:
-            # Prétraitement
-            img_arr = preprocess_pil_image(self.current_pil_image, self.input_size)
+            result = process_image(self.image_path)
+            names = result['names']
+            confidences = result['confidences']
+            avg_conf = result['avg_conf']
+            reliable = result['reliable']
+            gbif_info = result['gbif_info']
             
-            # Inférence (Récupération des Logits bruts)
-            outputs = self.session.run([self.output_name], {self.input_name: img_arr})
-            raw_logits = outputs[0][0] # Ce sont les scores bruts (ex: 4.35, -0.6...)
-            
-            # --------------------------------------
-            # Aide IA pour la correction de la proba ici
-            # --- CORRECTION : APPLIQUER SOFTMAX ---
-            # La formule magique pour transformer les scores en % (0 à 1)
-            # On soustrait le max pour la stabilité numérique (éviter d'exploser avec np.exp)
-            exp_vals = np.exp(raw_logits - np.max(raw_logits))
-            predictions = exp_vals / exp_vals.sum()
-            # --------------------------------------
-            
-            # On prend les 3 meilleurs
-            top_indices = np.argsort(predictions)[::-1][:3]
-            top_scores = predictions[top_indices]
-            
-            # Préparer les données pour l'affichage
+            # Prepare results_data for hierarchy
+            levels = ['Ordre', 'Famille', 'Genre', 'Espèce']
             results_data = []
-            for i, (idx, score) in enumerate(zip(top_indices, top_scores)):
-                conf = score * 100  # Maintenant score est entre 0 et 1, donc conf entre 0 et 100
-                
-                if idx < len(self.insect_species):
-                    name = self.insect_species[idx]
-                else:
-                    name = f"Classe {idx} (Hors liste)"
-                
-                # Trouver la clé de l'espèce dans hierarchy pour accéder à geo_db
-                species_key = None
-                if idx < len(self.insect_species):
-                    # Rechercher la clé correspondante dans hierarchy
-                    for key, info in self.hierarchy.items():
-                        if isinstance(info, dict):
-                            formatted = f"{info.get('genre', '')} {info.get('espece', '')}".strip()
-                            if formatted == name:
-                                species_key = key
-                                break
-                
-                results_data.append((i+1, name, conf, species_key))
+            for i in range(4):
+                level = levels[i]
+                name = names[i]
+                conf = confidences[i]
+                map_url = gbif_info.get('url') if i == 3 and gbif_info else None
+                results_data.append((level, name, conf, map_url))
             
-            # Afficher les résultats avec les boutons de carte
             self.display_results(results_data)
-            self.update_status(self._status_message('analysis_done'))
+            
+            # Update status
+            status = f"Confiance moyenne: {avg_conf:.1f}% - {'Fiable' if reliable else 'Incertain'}"
+            if gbif_info and 'url' in gbif_info:
+                status += f" | GBIF: {gbif_info['url']}"
+            self.update_status(status)
             
         except Exception as e:
             self.clear_results()
