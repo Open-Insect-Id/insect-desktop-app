@@ -3,12 +3,11 @@ Main entry point of the project
 """
 
 import json
-from pathlib import Path
 
 from config import *
-from gui import InsectDetectorApp
-from logger import setup_logger
-from model import load_model
+from ui.gui import InsectDetectorApp
+from utils.logger import setup_logger
+from model.model import load_model
 
 logger = setup_logger(__name__)
 
