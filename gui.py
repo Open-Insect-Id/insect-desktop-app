@@ -1,11 +1,12 @@
 import customtkinter as ctk
 from PIL import Image
-from tkinter import filedialog
 import numpy as np
 import random
 from preprocess import preprocess_pil_image
 from map_viewer import open_map_in_browser
 import wikipedia_search
+from plyer import filechooser
+
 
 import config
 
@@ -137,7 +138,14 @@ class InsectDetectorApp(ctk.CTk):
         self.lbl_status.configure(text=text)
 
     def upload_image(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Images", "*.jpg *.jpeg *.png")])
+
+        # file_path = filedialog.askopenfilename(
+        #     initialdir = os.path.expanduser("~/Downloads"),
+        #     filetypes = [("Images", "*.jpg *.jpeg *.png")]
+        # )
+
+        file_path = filechooser.open_file(filters=['image/*'])
+
         if file_path:
             self.image_path = file_path
             self.display_image(file_path)
