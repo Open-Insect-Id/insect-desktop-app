@@ -45,7 +45,8 @@ DEFAULT_PATHS_IMAGES = [
     Path(Path(__file__).parent / Path("images"))
 ]
 
-# Par défaut, on peut utiliser le dernier dossier de la liste (images dans le projet) pour éviter d'avoir à chercher dans les dossiers personnels
+# Par défaut, on peut utiliser le dernier dossier de la liste (images dans le projet)
+# pour éviter d'avoir à chercher dans les dossiers personnels
 PATH_IMAGES = DEFAULT_PATHS_IMAGES[-1]
 
 # Résultats

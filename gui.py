@@ -1,21 +1,23 @@
+import os
+import webbrowser
+from queue import Empty
+
 import customtkinter as ctk
 from PIL import Image
 import random
 from map_viewer import open_map_in_browser
 import wikipedia_search
 from tkinter import filedialog
-import os
 
 from model import process_image
-import webbrowser
-
 import config
+
+from mobile_server.server import IMAGE_QUEUE
 
 from logger import setup_logger
 from utils.api_result_frame import ApiResultFrame
 
 logger = setup_logger(__name__)
-
 
 # Apparence par défaut
 ctk.set_appearance_mode("Dark")
@@ -44,11 +46,21 @@ class InsectDetectorApp(ctk.CTk):
         self.current_pil_image = None
         self.analyzing = False
 
+        self.mobile_image_queue = None
+        self.mobile_window = None
+
         # Grille
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
         self.create_widgets()
+
+        # configure queue polling; queue object imported lazily to avoid circular imports
+        self.mobile_image_queue = IMAGE_QUEUE
+        self.after(500, self.poll_mobile_queue)
+
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
         # Afficher l'état du modèle
         status_text = self._status_message('model_loaded') if self.session is not None else self._status_message('model_missing')
         self.update_status(status_text)
@@ -57,7 +69,7 @@ class InsectDetectorApp(ctk.CTk):
         # ==================== SIDEBAR ====================
         self.sidebar = ctk.CTkFrame(self, width=260, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
-        self.sidebar.grid_rowconfigure(4, weight=1)
+        self.sidebar.grid_rowconfigure(5, weight=1)
 
         self.lbl_logo = ctk.CTkLabel(
             self.sidebar,
@@ -97,6 +109,17 @@ class InsectDetectorApp(ctk.CTk):
             command=self.clear_interface
         )
         self.btn_clear.grid(row=3, column=0, padx=20, pady=10, sticky="ew")
+
+        self.btn_mobile_connect = ctk.CTkButton(
+            self.sidebar,
+            text="📱 Mobile Connect",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=40,
+            fg_color="#1f6aa5",
+            hover_color="#195985",
+            command=self.start_mobile_connect,
+        )
+        self.btn_mobile_connect.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
 
         # Zone de statut en bas de la sidebar
         self.status_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
@@ -177,10 +200,7 @@ class InsectDetectorApp(ctk.CTk):
         )
 
         if file_path:
-            self.image_path = file_path
-            self.display_image(file_path)
-            self.btn_analyze.configure(state="normal")
-            self.update_status(self._status_message('image_loaded'))
+            self.load_image_for_analysis(file_path, source_label="desktop")
 
     def display_image(self, path):
         img = Image.open(path)
@@ -201,6 +221,12 @@ class InsectDetectorApp(ctk.CTk):
 
         self.lbl_image.configure(image=self.current_image_tk, text="")
         self.current_pil_image = img
+
+    def load_image_for_analysis(self, image_path, source_label):
+        self.image_path = image_path
+        self.display_image(image_path)
+        self.btn_analyze.configure(state="normal")
+        self.update_status(f"Image ready from {source_label}")
 
     def clear_interface(self):
         self.lbl_image.configure(
@@ -320,6 +346,46 @@ class InsectDetectorApp(ctk.CTk):
 
             row_index += 1
 
+    # ====== Mobile Integration ======
+    def start_mobile_connect(self):
+        # if window already exists, just bring to front
+        if self.mobile_window and self.mobile_window.winfo_exists():
+            self.mobile_window.lift()
+            return
+
+        try:
+            from mobile_connexion import MobileConnectionWindow
+        except Exception as e:
+            logger.error("Cannot import mobile_connexion: %s", e)
+            self.update_status("Mobile feature unavailable")
+            return
+
+        # instantiate window; it will start server itself
+        self.mobile_window = MobileConnectionWindow(self)
+        from mobile_server.server import IMAGE_QUEUE
+        self.mobile_image_queue = IMAGE_QUEUE
+        self.update_status("Mobile connection window opened")
+
+
+    def poll_mobile_queue(self):
+        """Poll the mobile upload queue and process new images."""
+        if self.mobile_image_queue is not None:
+            while True:
+                try:
+                    uploaded_image_path = self.mobile_image_queue.get_nowait()
+                except Empty:
+                    break
+
+                if os.path.exists(uploaded_image_path):
+                    self.load_image_for_analysis(uploaded_image_path, source_label="mobile")
+                    if not self.analyzing:
+                        self.start_analysis()
+                else:
+                    logger.warning("Mobile upload path not found: %s", uploaded_image_path)
+
+        self.after(500, self.poll_mobile_queue)
+
+
     def start_analysis(self):
         if not self.image_path or self.analyzing:
             return
@@ -403,3 +469,11 @@ class InsectDetectorApp(ctk.CTk):
         finally:
             self.analyzing = False
             self.btn_analyze.configure(state="normal")
+
+    def on_close(self):
+        if self.mobile_window and self.mobile_window.winfo_exists():
+            try:
+                self.mobile_window.destroy()
+            except Exception as e:
+                logger.error("Error closing mobile window: %s", e)
+        self.destroy()
