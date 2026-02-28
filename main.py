@@ -7,6 +7,7 @@ import json
 
 from model import load_model
 from gui import InsectDetectorApp
+from config import *
 
 from logger import setup_logger
 logger = setup_logger(__name__)
@@ -58,9 +59,9 @@ def main():
     """
     base = Path(__file__).parent
 
-    model_path = base / "model/insect_model.onnx"
-    hierarchy_path = base / "model/hierarchy_map.json"
-    labels_path = base / "model/hierarchy_labels.json"
+    model_path = base / MODEL_PATH
+    hierarchy_path = base / HIERARCHY_PATH
+    labels_path = base / LABELS_PATH
 
     # Charger le modèle synchroniquement au démarrage (souhait de l'utilisateur)
     try:
