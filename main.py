@@ -1,12 +1,18 @@
+"""
+Main entry point of the project
+"""
+
 from pathlib import Path
 import json
-import sys
 
 from model import load_model
 from gui import InsectDetectorApp
 
 
 def load_hierarchy(path: Path):
+    """
+    Load model and extract hierarchy names from json
+    """
     if path.exists():
         try:
             with open(path, 'r', encoding='utf-8') as f:
@@ -14,7 +20,7 @@ def load_hierarchy(path: Path):
 
             # Correction: rechercher la clé "hierarchy_map" si présente
             hierarchy = data.get("hierarchy_map", data)
-            
+
             # Extraire la base de données géographique
             geo_db = data.get("geo_db", {})
 
@@ -44,6 +50,9 @@ def load_hierarchy(path: Path):
 
 
 def main():
+    """
+    Main, load the model and starts the appp
+    """
     base = Path(__file__).parent
 
     model_path = base / "insect_model.onnx"
