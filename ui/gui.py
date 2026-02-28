@@ -251,6 +251,9 @@ class InsectDetectorApp(ctk.CTk):
         self.display_image(image_path)
         self.btn_analyze.configure(state="normal")
         self.update_clear_btn()
+
+        # Starts analyze right after picking an image
+        self.start_analysis()
         self.update_status(f"Image ready from {source_label}")
 
     def clear_interface(self):
