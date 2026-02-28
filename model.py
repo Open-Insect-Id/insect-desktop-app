@@ -5,6 +5,9 @@ import onnxruntime as ort
 from PIL import Image
 
 import gbif_api
+from logger import setup_logger
+
+logger = setup_logger(__name__)
 
 session = None
 input_name = None
@@ -32,7 +35,7 @@ def load_model(model_path: str, hierarchy_path: str, labels_path: str):
         output_name = session.get_outputs()[0].name
         input_shape = session.get_inputs()[0].shape
     except Exception as e:
-        print(f"❌ Erreur modèle: {e}")
+        logger.error(f"❌ Erreur modèle: {e}")
         raise
 
     with open(hierarchy_path, 'r') as f:
