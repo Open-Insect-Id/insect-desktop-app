@@ -1,11 +1,8 @@
 import customtkinter as ctk
 from PIL import Image
-import numpy as np
 import random
-from preprocess import preprocess_pil_image
 from map_viewer import open_map_in_browser
 import wikipedia_search
-from plyer import filechooser
 from tkinter import filedialog
 import os
 
@@ -147,8 +144,6 @@ class InsectDetectorApp(ctk.CTk):
             initialdir = os.path.expanduser("~/Downloads"),
             filetypes = [("Images", "*.jpg *.jpeg *.png")]
         )
-
-        # file_path = filechooser.open_file(filters=['image/*'])
 
         if file_path:
             self.image_path = file_path
