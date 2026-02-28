@@ -33,7 +33,7 @@ class CustomLogger(logging.Logger):
         **kwargs: Any,  # pyright: ignore[reportAny, reportExplicitAny]
     ) -> None:
         """
-        Vebose level of logging, behaves like any log level,
+        Verbose level of logging, behaves like any log level,
         but have a priority of 5
         """
         if self.isEnabledFor(VERBOSE):
