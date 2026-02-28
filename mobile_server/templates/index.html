@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>InsectID Mobile Capture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --green: #7dffb3;
+      --green-dim: #4ecb7a;
+      --green-glow: rgba(125, 255, 179, 0.15);
+      --green-glow-strong: rgba(125, 255, 179, 0.25);
+      --bg-deep: #080d0a;
+      --bg-mid: #0e1610;
+      --glass-bg: rgba(255, 255, 255, 0.035);
+      --glass-border: rgba(255, 255, 255, 0.07);
+      --glass-border-accent: rgba(125, 255, 179, 0.2);
+      --text-primary: #e8f5ee;
+      --text-secondary: rgba(232, 245, 238, 0.45);
+      --text-muted: rgba(232, 245, 238, 0.25);
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: 'DM Mono', monospace;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── Background ── */
+    .scene {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .scene::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: -10%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(ellipse at center, rgba(78, 203, 122, 0.12) 0%, transparent 65%);
+      animation: driftA 18s ease-in-out infinite alternate;
+    }
+
+    .scene::after {
+      content: '';
+      position: absolute;
+      bottom: -10%;
+      right: -15%;
+      width: 55%;
+      height: 55%;
+      background: radial-gradient(ellipse at center, rgba(30, 80, 50, 0.18) 0%, transparent 65%);
+      animation: driftB 22s ease-in-out infinite alternate;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+    }
+
+    @keyframes driftA {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(5%, 8%) scale(1.1); }
+    }
+    @keyframes driftB {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(-6%, -5%) scale(1.08); }
+    }
+
+    /* ── Shell ── */
+    .shell {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 400px;
+      padding: 1.5rem 1.25rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Status banner ── */
+    .status-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 100px;
+      padding: 0.45rem 1rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      width: fit-content;
+      align-self: flex-start;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
+      50%       { opacity: 0.5; box-shadow: 0 0 3px var(--green); }
+    }
+
+    #deviceName {
+      color: var(--green-dim);
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      backdrop-filter: blur(20px) saturate(120%);
+      -webkit-backdrop-filter: blur(20px) saturate(120%);
+      padding: 2rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.3),
+        0 24px 64px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--green);
+      font-weight: 400;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--text-primary);
+    }
+
+    h1 span {
+      color: var(--green);
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+      font-weight: 300;
+    }
+
+    /* ── Capture button ── */
+    .capture-zone {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .capture-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: rgba(125, 255, 179, 0.06);
+      border: 1.5px dashed rgba(125, 255, 179, 0.3);
+      border-radius: 14px;
+      padding: 1.1rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      color: var(--green);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      font-family: 'DM Mono', monospace;
+      user-select: none;
+    }
+
+    .capture-label:hover {
+      background: rgba(125, 255, 179, 0.1);
+      border-color: rgba(125, 255, 179, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .capture-label:active {
+      transform: translateY(0);
+    }
+
+    .capture-label svg {
+      opacity: 0.85;
+    }
+
+    #photoInput {
+      display: none;
+    }
+
+    /* ── Preview ── */
+    .preview-area {
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--glass-border);
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+
+    .preview-area.has-image {
+      border-color: var(--glass-border-accent);
+    }
+
+    .preview-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .preview-placeholder svg {
+      opacity: 0.3;
+    }
+
+    #previewImage {
+      width: 100%;
+      height: auto;
+      max-height: 280px;
+      object-fit: cover;
+      display: none;
+    }
+
+    /* ── Analyze button ── */
+    .analyze-button {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+      background: linear-gradient(135deg, var(--green) 0%, #52d68a 100%);
+      color: #061209;
+      box-shadow: 0 0 32px rgba(125, 255, 179, 0.2), 0 4px 16px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .analyze-button::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .analyze-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 44px rgba(125, 255, 179, 0.35), 0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .analyze-button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .analyze-button:disabled {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* ── Upload status ── */
+    .upload-status {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      padding: 0.75rem 1rem;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      letter-spacing: 0.04em;
+    }
+
+    .upload-status[hidden] {
+      display: none;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid rgba(125, 255, 179, 0.2);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--glass-border);
+      border: none;
+      margin: -0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="scene"></div>
+  <div class="noise"></div>
+
+  <main class="shell">
+    <section class="status-banner" id="statusBanner">
+      <span class="status-dot"></span>
+      Connected:&nbsp;<span id="deviceName">Loading…</span>
+    </section>
+
+    <div class="card">
+      <div class="header">
+        <span class="eyebrow">Welcome !</span>
+        <h1>Insect<span>ID</span></h1>
+        <p class="subtitle">Spot an insect and send it to your computer !</p>
+      </div>
+
+      <hr class="divider">
+
+      <div class="capture-zone">
+        <label class="capture-label" for="photoInput">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          Take Photo
+        </label>
+        <input id="photoInput" type="file" accept="image/*" capture="environment" />
+
+        <div class="preview-area" id="previewArea" aria-live="polite">
+          <div class="preview-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            Preview appears here
+          </div>
+          <img id="previewImage" alt="Preview of selected insect image" />
+        </div>
+      </div>
+
+      <button id="analyzeButton" class="analyze-button" type="button" disabled>
+        Analyze this insect 🔍
+      </button>
+
+      <div class="upload-status" id="uploadStatus" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="uploadStatusText">Waiting for you to spot an insect hehe</span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const deviceNameElement = document.getElementById('deviceName');
+    const photoInputElement = document.getElementById('photoInput');
+    const previewImageElement = document.getElementById('previewImage');
+    const previewAreaElement = document.getElementById('previewArea');
+    const analyzeButtonElement = document.getElementById('analyzeButton');
+    const uploadStatusElement = document.getElementById('uploadStatus');
+    const uploadStatusTextElement = document.getElementById('uploadStatusText');
+
+    let selectedFile = null;
+
+    async function loadStatus() {
+      try {
+        const response = await fetch('/status', { method: 'GET' });
+        const payload = await response.json();
+        deviceNameElement.textContent = payload.device_name || 'Desktop host';
+      } catch {
+        deviceNameElement.textContent = 'Unavailable';
+      }
+    }
+
+    function showPreview(file) {
+      const objectUrl = URL.createObjectURL(file);
+      previewImageElement.src = objectUrl;
+      previewImageElement.style.display = 'block';
+      previewAreaElement.classList.add('has-image');
+      const placeholder = previewAreaElement.querySelector('.preview-placeholder');
+      if (placeholder) placeholder.style.display = 'none';
+    }
+
+    function setUploadingState(isUploading, text) {
+      uploadStatusElement.hidden = !isUploading;
+      uploadStatusTextElement.textContent = text;
+      analyzeButtonElement.disabled = isUploading || !selectedFile;
+      photoInputElement.disabled = isUploading;
+    }
+
+    function showUploadMessage(message) {
+      uploadStatusElement.hidden = false;
+      uploadStatusTextElement.textContent = message;
+      const spinnerElement = uploadStatusElement.querySelector('.spinner');
+      if (spinnerElement) spinnerElement.style.display = 'none';
+      analyzeButtonElement.disabled = false;
+      photoInputElement.disabled = false;
+    }
+
+    async function uploadSelectedImage() {
+      if (!selectedFile) return;
+      setUploadingState(true, 'Uploading…');
+      const formData = new FormData();
+      formData.append('photo', selectedFile, selectedFile.name || 'mobile_capture.jpg');
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Device-Name': navigator.userAgent }
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || 'Upload failed');
+        showUploadMessage('Upload complete. Processing on desktop…');
+        analyzeButtonElement.textContent = 'Sent successfully ✅';
+      } catch {
+        showUploadMessage('Upload failed. Try again.');
+      }
+    }
+
+    photoInputElement.addEventListener('change', (event) => {
+      const [file] = event.target.files || [];
+      selectedFile = file || null;
+      if (!selectedFile) { analyzeButtonElement.disabled = true; return; }
+      showPreview(selectedFile);
+      analyzeButtonElement.disabled = false;
+      analyzeButtonElement.textContent = 'Analyze this insect 🔍';
+      uploadStatusElement.hidden = true;
+      const spinnerElement = uploadStatusElement.querySelector('.spinner');
+      if (spinnerElement) spinnerElement.style.display = 'inline-block';
+    });
+
+    analyzeButtonElement.addEventListener('click', uploadSelectedImage);
+    loadStatus();
+  </script>
+</body>
+</html>

@@ -15,14 +15,14 @@ from PIL import Image
 from werkzeug.serving import make_server
 
 APP_NAME = "Open Insect Orga - Mobile Upload"
-DEFAULT_PORT = 5050
+DEFAULT_PORT = 3630
 UPLOAD_PREFIX = "mobile_upload_"
 CONNECTION_TIMEOUT_SECONDS = 120
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
 
 MODULE_DIRECTORY = Path(__file__).resolve().parent
 TEMPLATES_DIRECTORY = MODULE_DIRECTORY / "templates"
-STATIC_DIRECTORY = MODULE_DIRECTORY / "static"
+# static folder removed; CSS now inlined in HTML
 UPLOAD_DIRECTORY = MODULE_DIRECTORY / "uploads"
 # Queue partagée avec le desktop
 IMAGE_QUEUE: queue.Queue[str] = queue.Queue()
@@ -105,7 +105,6 @@ class MobileServerRuntime:
         flask_app = Flask(
             __name__,
             template_folder=str(TEMPLATES_DIRECTORY),
-            static_folder=str(STATIC_DIRECTORY),
         )
 
         @flask_app.before_request
