@@ -1,4 +1,9 @@
+from math import lgamma
+
 import requests
+
+from logger import setup_logger
+logger = setup_logger(__name__)
 
 
 def get_species_id(species_name: str) -> str:
@@ -11,7 +16,7 @@ def get_species_id(species_name: str) -> str:
         else:
             return ""
     except Exception as e:
-        print(f"Erreur lors de la recherche de l'espèce: {e}")
+        logger.error(f"Erreur lors de la recherche de l'espèce: {e}")
         return ""
     
 def get_species_info(species_id: str) -> dict:
@@ -38,8 +43,8 @@ def get_species_image(species_id: str, species_name: str = "") -> list:
         media_resp = requests.get(media_url, headers={'User-Agent': 'Insect-ID/1.0'}, timeout=10)
         media_data = media_resp.json()
         
-        print(f"Media response status: {media_resp.status_code}")
-        print(f"Media data count: {media_data.get('count', 0)}")
+        logger.info(f"Media response status: {media_resp.status_code}")
+        logger.debug("Media data count: {media_data.get('count', 0)}")
         
         for item in media_data.get("results", []):
             if "media" in item:
@@ -58,7 +63,7 @@ def get_species_image(species_id: str, species_name: str = "") -> list:
         
         return images
     except Exception as e:
-        print(f"Erreur lors de la récupération de l'image: {e}")
+        logger.error(f"Erreur lors de la récupération de l'image: {e}")
         return []
     
 def get_species_locations(species_id: str, limit: int = 500) -> list:
@@ -68,10 +73,10 @@ def get_species_locations(species_id: str, limit: int = 500) -> list:
         occ_resp = requests.get(occ_url, headers={'User-Agent': 'Insect-ID/1.0'}, timeout=5)
         occ_data = occ_resp.json()
 
-        print(f"Occurrence URL: {occ_url}")
+        logger.debug(f"Occurrence URL: {occ_url}")
         
-        print(f"Occ response status: {occ_resp.status_code}")
-        print(f"Occ data count: {occ_data.get('count', 0)}")
+        logger.debug(f"Occ response status: {occ_resp.status_code}")
+        logger.debug(f"Occ data count: {occ_data.get('count', 0)}")
         
         locations = []
         for item in occ_data.get("results", []):
@@ -80,7 +85,7 @@ def get_species_locations(species_id: str, limit: int = 500) -> list:
         
         return locations
     except Exception as e:
-        print(f"Erreur lors de la récupération des occurrences: {e}")
+        logger.error(f"Erreur lors de la récupération des occurrences: {e}")
         return []
     
 
@@ -89,13 +94,13 @@ if __name__ == "__main__":
     species_id = get_species_id(species_name)
     if species_id:
         species_info = get_species_info(species_id[0])
-        print(species_info)
+        logger.info(species_info)
         image_url = ""
         if "error" not in species_info:
             image_url = get_species_image(species_id[1], species_name)
         locations = get_species_locations(species_id[1])
-        print(f"Locations found: {len(locations)}")
+        logger.debug(f"Locations found: {len(locations)}")
         from map_viewer import create_insect_map, open_map_in_browser
         map_path = create_insect_map(species_name, locations, "test_map.html")
-        print(f"Map saved to: {map_path}")
+        logger.debug(f"Map saved to: {map_path}")
         open_map_in_browser(species_name, locations)
