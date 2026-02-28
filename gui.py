@@ -1,22 +1,19 @@
 import os
+import random
 import webbrowser
 from queue import Empty
+from tkinter import filedialog
 
 import customtkinter as ctk
 from PIL import Image
-import random
 
-from gbif_api import get_species_image, get_species_id
-from map_viewer import open_map_in_browser
-import wikipedia_search
-from tkinter import filedialog
-
-from model import process_image
 import config
-
-from mobile_server.server import IMAGE_QUEUE
-
+import wikipedia_search
+from gbif_api import get_species_id, get_species_image
 from logger import setup_logger
+from map_viewer import open_map_in_browser
+from mobile_server.server import IMAGE_QUEUE
+from model import process_image
 from utils.api_result_frame import ApiResultFrame
 
 logger = setup_logger(__name__)

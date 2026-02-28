@@ -1,6 +1,8 @@
 import unittest
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+
 
 class TestInsectModelEnvironment(unittest.TestCase):
     """
@@ -17,8 +19,8 @@ class TestInsectModelEnvironment(unittest.TestCase):
     def test_01_imports_libraries(self):
         """Vérifie que toutes les bibliothèques nécessaires sont installées."""
         try:
-            import onnxruntime
             import customtkinter
+            import onnxruntime
             from PIL import Image
         except ImportError as e:
             self.fail(f"Dépendance manquante : {e}")

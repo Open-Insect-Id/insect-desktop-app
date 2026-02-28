@@ -1,5 +1,6 @@
 import requests
 
+
 def get_species_id(species_name: str) -> str:
     """GBIF search for species ID."""
     try:

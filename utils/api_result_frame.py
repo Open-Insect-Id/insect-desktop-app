@@ -1,8 +1,9 @@
+import threading
+from io import BytesIO
+
 import customtkinter as ctk
 import requests
 from PIL import Image
-from io import BytesIO
-import threading
 
 
 class ApiResultFrame(ctk.CTkScrollableFrame):
