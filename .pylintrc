@@ -1,0 +1,5 @@
+[FORMAT]
+max-line-length=150
+
+[Messages Control]
+disable=broad-except
