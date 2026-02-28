@@ -19,7 +19,6 @@ def summarize_wikipedia_page(text) -> str:
         wikipedia.set_lang("en")
         summary = wikipedia.summary(text, sentences = 10)
 
-    # TODO Change this to a visual output in the app because RN it's just a debug print
     return summary
 
 def open_web_browser_wikipedia_search(text):
