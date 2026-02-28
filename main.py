@@ -14,7 +14,7 @@ logger = setup_logger(__name__)
 
 def load_hierarchy(path: Path):
     """
-    Load model and extract hierarchy names from json
+    Load model and extract hierarchy names from JSON
     """
     if path.exists():
         try:
@@ -54,7 +54,7 @@ def load_hierarchy(path: Path):
 
 def main():
     """
-    Main, load the model and starts the appp
+    Main, load the model and starts the app
     """
     base = Path(__file__).parent
 
