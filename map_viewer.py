@@ -5,7 +5,8 @@ import tempfile
 import webbrowser
 
 import folium
-from folium.plugins import HeatMap
+from folium.plugins import HeatMap, MiniMap
+
 from logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -36,6 +37,8 @@ def create_insect_map(species_name: str, coordinates: list, output_path: str = N
         zoom_start=6,
         tiles='OpenStreetMap'
     )
+
+    MiniMap(toggle_display=True).add_to(m)
 
     # Ajouter un marqueur pour chaque observation
     for lat, lon in coordinates:

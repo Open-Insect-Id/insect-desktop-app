@@ -2,8 +2,9 @@
 Module qui s'occupe des fonctions en lien avec Wikipedia
 """
 
-import wikipedia
 import webbrowser
+
+import wikipedia
 
 
 def summary(text):
