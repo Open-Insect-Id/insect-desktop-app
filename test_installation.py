@@ -1,5 +1,4 @@
 import unittest
-import sys
 import numpy as np
 from pathlib import Path
 

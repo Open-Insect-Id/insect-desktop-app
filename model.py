@@ -1,5 +1,5 @@
 """
-File responsible of loading the onnx model made by @YoannDev90
+File responsible for loading the onnx model made by @YoannDev90
 https://github.com/Open-Insect-Id/dataset
 """
 
