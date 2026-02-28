@@ -6,6 +6,8 @@ from preprocess import preprocess_pil_image
 from map_viewer import open_map_in_browser
 import wikipedia_search
 from plyer import filechooser
+from tkinter import filedialog
+import os
 
 from model import process_image
 import webbrowser
