@@ -24,3 +24,5 @@ typing_extensions==4.15.0
 urllib3==2.6.3
 wikipedia==1.4.0
 xyzservices==2025.11.0
+
+plyer
