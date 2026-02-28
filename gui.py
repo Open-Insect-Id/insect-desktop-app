@@ -12,6 +12,8 @@ import webbrowser
 import config
 
 from logger import setup_logger
+from utils.api_result_frame import ApiResultFrame
+
 logger = setup_logger(__name__)
 
 
@@ -129,11 +131,33 @@ class InsectDetectorApp(ctk.CTk):
         )
         self.lbl_image.place(relx=0.5, rely=0.5, anchor="center")
 
+        # Bottom area (results left, images right)
+        self.result_frame = ctk.CTkFrame(self.main_view)
+
+        # Make 2 equal columns
+        self.result_frame.grid_columnconfigure(0, weight=1)
+        self.result_frame.grid_columnconfigure(1, weight=1)
+        self.result_frame.grid_rowconfigure(0, weight=1)
+
+        # LEFT — probabilities
+        self.result_scores_container = ctk.CTkScrollableFrame(self.result_frame)
+        self.result_scores_container.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+
+        # RIGHT — API images grid
+        self.api_images_container = ApiResultFrame(self.result_frame)
+        self.api_images_container.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
+
         # Zone Résultats
-        self.result_container = ctk.CTkScrollableFrame(self.main_view, fg_color="transparent")
-        self.result_container.grid(row=1, column=0, sticky="nsew")
-        
+        # self.result_frame = ctk.CTkScrollableFrame(self.main_view, fg_color="transparent")
+        # self.result_frame.grid(row=1, column=0, sticky="nsew")
+        #
         self.result_widgets = []
+
+    def show_results_area(self):
+        self.result_frame.grid(row=1, column=0, sticky="nsew")
+
+    def hide_results_area(self):
+        self.result_frame.grid_remove()
 
     def _status_message(self, key):
         msg = config.MESSAGES.get(key)
@@ -190,46 +214,57 @@ class InsectDetectorApp(ctk.CTk):
 
     def clear_results(self):
         """Efface tous les widgets de résultats."""
-        for widget in self.result_widgets:
+        for widget in self.result_scores_container.winfo_children():
             widget.destroy()
-        self.result_widgets.clear()
-    
+        for widget in self.api_images_container.winfo_children():
+            widget.destroy()
+
     def display_results(self, results_data):
         self.clear_results()
-        
+        self.show_results_area()
+
         # Titre des résultats
         title_text = config.MESSAGES.get("results_title", "🔎 RÉSULTATS DE L'ANALYSE")
         title = ctk.CTkLabel(
-            self.result_container,
+            self.result_scores_container,
             text=title_text,
             font=ctk.CTkFont(size=18, weight="bold"),
             text_color=("gray10", "gray90")
         )
-        title.pack(pady=(5, 15), anchor="w")
-        self.result_widgets.append(title)
-        
+        title.grid(row=0, column=0, sticky="w", pady=(5, 15))
+        # self.result_widgets.append(title)
+
+        row_index = 1
+
         # Afficher chaque résultat
         for level, name, conf, map_url in results_data:
-            card_frame = ctk.CTkFrame(self.result_container, fg_color=("gray85", "gray20"), corner_radius=8)
-            card_frame.pack(fill="x", pady=5, padx=5)
-            self.result_widgets.append(card_frame)
+            card_frame = ctk.CTkFrame(
+                self.result_scores_container,
+                fg_color=("gray85", "gray20"),
+                corner_radius=8
+            )
+            card_frame.grid(row=row_index, column=0, sticky="ew", pady=5, padx=5)
+            # self.result_widgets.append(card_frame)
+
+            card_frame.grid_columnconfigure(0, weight=1)
 
             # Contenu principal de la carte
             header_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
-            header_frame.pack(fill="x", padx=10, pady=(10, 5))
-            
+            header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 5))
+            header_frame.grid_columnconfigure(0, weight=1)
+
             # Nom de l'espèce
             name_label = ctk.CTkLabel(
                 header_frame,
                 text=f"{level} : {name}",
                 font=ctk.CTkFont(size=15, weight="bold")
             )
-            name_label.pack(side="left")
-            
+            name_label.grid(row=0, column=0, sticky="w")
+
             # Boutons à droite
             btn_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
-            btn_frame.pack(side="right")
-            
+            btn_frame.grid(row=0, column=1, sticky="e")
+
             # Bouton Wiki
             wiki_btn = ctk.CTkButton(
                 btn_frame,
@@ -241,7 +276,7 @@ class InsectDetectorApp(ctk.CTk):
                 hover_color="#454747",
                 command=lambda n=name: wikipedia_search.search(n)
             )
-            wiki_btn.pack(side="right", padx=(5, 0))
+            wiki_btn.grid(row=0, column=0, padx=(5, 0))
 
             # Bouton Carte (si dispo car changements depuis le dernier model - TODO : migrer vers GBIF)
             if map_url:
@@ -255,22 +290,24 @@ class InsectDetectorApp(ctk.CTk):
                     hover_color="#26885f",
                     command=lambda url=map_url: webbrowser.open(url)
                 )
-                map_btn.pack(side="right", padx=(5, 0))
-            
+                map_btn.grid(row=0, column=1, padx=(5, 0))
+
             # Barre de progression
             progress_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
-            progress_frame.pack(fill="x", padx=10, pady=(0, 10))
+            progress_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 10))
+            progress_frame.grid_columnconfigure(0, weight=1)
+
             progress_bar = ctk.CTkProgressBar(progress_frame, height=10)
-            progress_bar.pack(side="left", fill="x", expand=True, padx=(0, 10))
-            progress_bar.set(conf / 100.0) # Accepte une valeur entre 0 et 1
-            
+            progress_bar.grid(row=0, column=0, sticky="ew", padx=(0, 10))
+            progress_bar.set(conf / 100.0)  # Accepte une valeur entre 0 et 1
+
             # Définir la couleur selon la confiance
             if conf > 80:
-                progress_bar.configure(progress_color="#2fa572") # Vert
+                progress_bar.configure(progress_color="#2fa572")  # Vert
             elif conf > 50:
-                progress_bar.configure(progress_color="#d68c22") # Orange
+                progress_bar.configure(progress_color="#d68c22")  # Orange
             else:
-                progress_bar.configure(progress_color="#cf3838") # Rouge
+                progress_bar.configure(progress_color="#cf3838")  # Rouge
 
             progress_label = ctk.CTkLabel(
                 progress_frame,
@@ -279,7 +316,9 @@ class InsectDetectorApp(ctk.CTk):
                 width=50,
                 anchor="e"
             )
-            progress_label.pack(side="right")
+            progress_label.grid(row=0, column=1, sticky="e")
+
+            row_index += 1
 
     def start_analysis(self):
         if not self.image_path or self.analyzing:
@@ -287,7 +326,7 @@ class InsectDetectorApp(ctk.CTk):
         if self.session is None:
             self.clear_results()
             error_label = ctk.CTkLabel(
-                self.result_container,
+                self.result_frame,
                 text=self._status_message('model_missing'),
                 font=ctk.CTkFont(size=14, weight="bold"),
                 text_color="#cf3838"
@@ -303,12 +342,18 @@ class InsectDetectorApp(ctk.CTk):
         
         # Indicateur de chargement visuel dans les résultats
         self.clear_results()
+        self.show_results_area()
+
+        for widget in self.result_scores_container.winfo_children():
+            widget.destroy()
+
         loading_label = ctk.CTkLabel(
-            self.result_container,
+            self.result_scores_container,
             text="⏳ Analyse en cours...",
             font=ctk.CTkFont(size=16, slant="italic")
         )
-        loading_label.pack(pady=40)
+
+        loading_label.grid(row=0, column=0, pady=40)
         self.result_widgets.append(loading_label)
 
         # Lancer en tâche de fond pour garder l'UI réactive
@@ -331,23 +376,27 @@ class InsectDetectorApp(ctk.CTk):
                 conf = confidences[i]
                 map_url = gbif_info.get('url') if i == 3 and gbif_info else None
                 results_data.append((level, name, conf, map_url))
-            
-            self.display_results(results_data)
-            
+
             status = f"Confiance: {avg_conf:.1f}% - {'Fiable ✅' if reliable else 'Incertain ⚠️'}"
             if gbif_info and 'url' in gbif_info:
                 status += f" | GBIF: {gbif_info['url']}"
             self.update_status(status)
-            
+            self.display_results(results_data)
+
         except Exception as e:
             self.clear_results()
+
+            self.hide_results_area()
+
             error_label = ctk.CTkLabel(
-                self.result_container,
+                self.result_frame,
                 text=f"❌ Erreur lors de l'analyse:\n{e}",
                 font=ctk.CTkFont(size=14),
                 text_color="#cf3838"
             )
-            error_label.pack(pady=20)
+
+            error_label.grid(row=0, column=0, columnspan=2, pady=20)
+
             self.result_widgets.append(error_label)
             self.update_status(self._status_message('analysis_error'))
             logger.error(f"Erreur inférence: {e}")
