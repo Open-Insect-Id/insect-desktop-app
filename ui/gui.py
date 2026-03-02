@@ -72,7 +72,7 @@ class InsectDetectorApp(ctk.CTk):
         # ==================== SIDEBAR ====================
         self.sidebar = ctk.CTkFrame(self, width=260, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
-        self.sidebar.grid_rowconfigure(5, weight=1)
+        self.sidebar.grid_rowconfigure(6, weight=1)
 
         self.lbl_logo = ctk.CTkLabel(
             self.sidebar,
@@ -135,11 +135,11 @@ class InsectDetectorApp(ctk.CTk):
             hover_color="#195985",
             command=self.open_map,
         )
-        self.btn_mobile_connect.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
+        self.btn_mobile_connect.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
 
         # Zone de statut en bas de la sidebar
         self.status_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        self.status_frame.grid(row=5, column=0, padx=20, pady=20, sticky="ew")
+        self.status_frame.grid(row=6, column=0, padx=20, pady=20, sticky="ew")
         
         self.lbl_status = ctk.CTkLabel(
             self.status_frame,
@@ -509,6 +509,7 @@ class InsectDetectorApp(ctk.CTk):
             species_id = get_species_id(self.computed_insect_name)
 
             images = get_species_image(species_id)
+            logger.warning(f"Downloading {len(images)}")
             self.api_images_container.display_images_async(images)
 
             self.update_status(status)
