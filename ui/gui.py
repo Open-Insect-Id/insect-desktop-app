@@ -24,7 +24,7 @@ ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
 class InsectDetectorApp(ctk.CTk):
-    def __init__(self, session, input_name, output_name, input_size, insect_species, hierarchy=None, geo_db=None):
+    def __init__(self, session, input_name, output_name, input_size, insect_species, hierarchy=None):
         super().__init__()
 
         # --- Modèle et métadonnées ---
