@@ -10,7 +10,7 @@ def get_species_id(species_name: str) -> str:
     """GBIF search for species ID."""
     try:
         search_url = "https://api.gbif.org/v1/species/search?q=" + species_name.replace(" ", "+")
-        resp = requests.get(search_url, headers={'User-Agent': 'Insect-ID/1.0'}, timeout=5)
+        resp = requests.get(search_url, timeout=5)
         if resp.status_code == 200 and resp.json()['results']:
             return str(resp.json()['results'][0]['key']),str(resp.json()['results'][0]['nubKey'])
         else:
@@ -23,7 +23,7 @@ def get_species_info(species_id: str) -> dict:
     """GBIF lookup."""
     try:
         detail_url = f"https://api.gbif.org/v1/species/{species_id}"
-        detail_resp = requests.get(detail_url, headers={'User-Agent': 'Insect-ID/1.0'}, timeout=5)
+        detail_resp = requests.get(detail_url, timeout=10)
         data = detail_resp.json()
         
         return {
@@ -35,16 +35,16 @@ def get_species_info(species_id: str) -> dict:
     except Exception as e:
         return {"error": f"API erreur: {e}"}
 
-def get_species_image(species_id: str, species_name: str = "") -> list:
+def get_species_image(species_id: str, limit: int = 10) -> list:
     """GBIF media lookup."""
     images = []
     try:
-        media_url = f"https://api.gbif.org/v1/occurrence/search?taxonKey={species_id}&mediaType=StillImage&limit=100"
-        media_resp = requests.get(media_url, headers={'User-Agent': 'Insect-ID/1.0'}, timeout=10)
+        media_url = f"https://api.gbif.org/v1/occurrence/search?taxonKey={species_id}&mediaType=StillImage&limit={limit}"
+        media_resp = requests.get(media_url, timeout=10)
         media_data = media_resp.json()
         
         logger.info(f"Media response status: {media_resp.status_code}")
-        logger.debug("Media data count: {media_data.get('count', 0)}")
+        logger.debug(f"Media data count: {media_data.get('count', 0)}")
         
         for item in media_data.get("results", []):
             if "media" in item:
@@ -70,7 +70,7 @@ def get_species_locations(species_id: str, limit: int = 500) -> list:
     """GBIF occurrence lookup."""
     try:
         occ_url = f"https://api.gbif.org/v1/occurrence/search?taxonKey={species_id}&hasCoordinate=true&limit={limit}"
-        occ_resp = requests.get(occ_url, headers={'User-Agent': 'Insect-ID/1.0'}, timeout=10)
+        occ_resp = requests.get(occ_url, timeout=15)
         occ_data = occ_resp.json()
 
         logger.debug(f"Occurrence URL: {occ_url}")
