@@ -11,6 +11,7 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
         super().__init__(master, **kwargs)
         self.images_refs = []
         self.loading_label = None
+        self.grid_columnconfigure((0, 1, 2), weight=1)
 
     def display_images_async(self, images: list):
         # Clear previous content
@@ -19,9 +20,13 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
 
         self.images_refs.clear()
 
+        if not images:
+            ctk.CTkLabel(self, text="Pas d'images trouvées", font=ctk.CTkFont(slant="italic")).grid(row=0, column=0, columnspan=3, padx=20, pady=20)
+            return
+
         # Show loading text
-        self.loading_label = ctk.CTkLabel(self, text="Loading images...")
-        self.loading_label.grid(row=0, column=0, padx=20, pady=20)
+        self.loading_label = ctk.CTkLabel(self, text="Chargement des images...")
+        self.loading_label.grid(row=0, column=0, columnspan=3, padx=20, pady=20)
 
         # Start background thread
         thread = threading.Thread(
@@ -33,13 +38,14 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
 
     def _load_images_worker(self, images: list):
         loaded = []
-        for img_data in images:
+        for url in images:
             try:
-                response = requests.get(img_data["url"], timeout=5)
+                response = requests.get(url, timeout=10)
                 pil_image = Image.open(BytesIO(response.content))
                 pil_image.thumbnail((150, 150))
                 loaded.append(pil_image)
-            except Exception:
+            except Exception as e:
+                print(f"Error loading image from {url}: {e}")
                 continue
 
         # Switch back to main thread

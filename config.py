@@ -5,14 +5,25 @@ import logging
 import os
 from pathlib import Path
 
-# Thème et apparence
+# Apparence
 THEME = {
     "mode": "dark",
-    "primary_color": "#00D9FF",
-    "secondary_color": "#FF6B6B",
+    "primary_color": "#1f6aa5",
+    "hover_color": "#195985",
     "background": "#1e1e1e",
-    "text": "#FFFFFF",
-    "accent": "#00D9FF"
+    "text": ("gray10", "#DCE4EE"),
+    "btn_height": 45,
+    "icon_size": (24, 24)
+}
+
+# Mapping des icônes
+ICON_MAPPING = {
+    "upload": "upload.png",
+    "search": "search.png",
+    "clear": "dust.png",
+    "mobile": "mobile-phone.png",
+    "map": "maps.png",
+    "info": "info.png"
 }
 
 # Dimensions
@@ -110,11 +121,11 @@ MESSAGES = {
 
     # textes spécifiques à l'interface
     "app_title": "🦋 Open Insect Identifier",
-    "button_upload": "📁 Charger Image",
-    "button_identify": "🔍 Identifier",
+    "button_upload": "Charger Image",
+    "button_identify": "Identifier",
     "button_clear": "Effacer",
     "no_image_selected": "Aucune image sélectionnée",
-    "results_title": "🔎 RÉSULTATS DE L'ANALYSE",
+    "results_title": "RÉSULTATS DE L'ANALYSE",
     "geo_missing": "Aucune donnée géographique pour {name}"
 }
 

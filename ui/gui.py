@@ -39,8 +39,15 @@ class InsectDetectorApp(ctk.CTk):
         self.species_info = None
 
         # --- UI ---
-        self.title(config.MESSAGES.get("app_title", "Open Insect Identifier"))
+        self.title(config.get("app_title", "Open Insect Identifier") if isinstance(config, dict) else config.MESSAGES.get("app_title", "Open Insect Identifier"))
         self.geometry("1000x700")
+        
+        # Maximiser par défaut (gestion spécifique Linux/Windows)
+        if os.name == 'nt':
+            self.after(0, lambda: self.state('zoomed'))
+        else:
+            self.after(0, lambda: self.attributes('-zoomed', True))
+            
         self.minsize(800, 500)
 
         # Etat
@@ -51,6 +58,9 @@ class InsectDetectorApp(ctk.CTk):
 
         self.mobile_image_queue = None
         self.mobile_window = None
+
+        # --- Charger les icônes ---
+        self.load_icons()
 
         # Grille
         self.grid_columnconfigure(1, weight=1)
@@ -68,7 +78,31 @@ class InsectDetectorApp(ctk.CTk):
         status_text = self._status_message('model_loaded') if self.session is not None else self._status_message('model_missing')
         self.update_status(status_text)
 
+    def load_icons(self):
+        """Charge les icônes depuis ui/icons."""
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ui", "icons")
+        self.icons = {}
+
+        # Utilisation du mappage défini dans config.py
+        for key, filename in config.ICON_MAPPING.items():
+            path = os.path.join(icon_path, filename)
+            if os.path.exists(path):
+                self.icons[key] = ctk.CTkImage(
+                    light_image=Image.open(path),
+                    dark_image=Image.open(path),
+                    size=config.THEME.get("icon_size", (24, 24))
+                )
+            else:
+                logger.warning(f"Icon not found: {path}")
+                self.icons[key] = None
+
     def create_widgets(self):
+        # Récupération des styles depuis config.py
+        btn_height = config.THEME.get("btn_height", 45)
+        primary_color = config.THEME.get("primary_color", "#1f6aa5")
+        hover_color = config.THEME.get("hover_color", "#195985")
+        text_color = config.THEME.get("text", ("gray10", "#DCE4EE"))
+
         # ==================== SIDEBAR ====================
         self.sidebar = ctk.CTkFrame(self, width=260, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
@@ -83,22 +117,29 @@ class InsectDetectorApp(ctk.CTk):
 
         self.btn_upload = ctk.CTkButton(
             self.sidebar,
-            text=config.MESSAGES.get("button_upload", "📁 Charger Image"),
+            text=config.MESSAGES.get("button_upload", "Charger Image"),
             font=ctk.CTkFont(size=14, weight="bold"),
-            height=40,
+            height=btn_height,
+            image=self.icons.get("upload"),
+            compound="left",
+            fg_color=primary_color,
+            hover_color=hover_color,
+            text_color=text_color,
             command=self.upload_image
         )
         self.btn_upload.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
 
         self.btn_analyze = ctk.CTkButton(
             self.sidebar,
-            text=config.MESSAGES.get("button_identify", "🔍 Identifier"),
+            text=config.MESSAGES.get("button_identify", "Identifier"),
             font=ctk.CTkFont(size=14, weight="bold"),
-            height=40,
-            fg_color="transparent",
+            height=btn_height,
+            image=self.icons.get("search"),
+            compound="left",
+            fg_color=primary_color,
+            hover_color=hover_color,
+            text_color=text_color,
             state="disabled",
-            border_width=2,
-            text_color=("gray10", "#DCE4EE"),
             command=self.start_analysis
         )
         self.btn_analyze.grid(row=2, column=0, padx=20, pady=10, sticky="ew")
@@ -106,36 +147,45 @@ class InsectDetectorApp(ctk.CTk):
         self.btn_clear = ctk.CTkButton(
             self.sidebar,
             text=config.MESSAGES.get("button_clear", "Effacer"),
-            fg_color="#cf3838",
-            hover_color="#9e2b2b",
-            height=35,
+            image=self.icons.get("clear"),
+            compound="left",
+            height=btn_height,
             state="disabled",
+            fg_color=primary_color,
+            hover_color=hover_color,
+            text_color=text_color,
             command=self.clear_interface
         )
         self.btn_clear.grid(row=3, column=0, padx=20, pady=10, sticky="ew")
 
         self.btn_mobile_connect = ctk.CTkButton(
             self.sidebar,
-            text="📱 Mobile Connect",
+            text="Mobile Connect",
+            image=self.icons.get("mobile"),
+            compound="left",
             font=ctk.CTkFont(size=14, weight="bold"),
-            height=40,
-            fg_color="#1f6aa5",
-            hover_color="#195985",
+            height=btn_height,
+            fg_color=primary_color,
+            hover_color=hover_color,
+            text_color=text_color,
             command=self.start_mobile_connect,
         )
         self.btn_mobile_connect.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
 
-        self.btn_mobile_connect = ctk.CTkButton(
+        self.btn_view_map = ctk.CTkButton(
             self.sidebar,
-            text="🗺️ View map",
+            text="View map",
+            image=self.icons.get("map"),
+            compound="left",
             font=ctk.CTkFont(size=14, weight="bold"),
-            height=40,
+            height=btn_height,
             state="disabled",
-            fg_color="#1f6aa5",
-            hover_color="#195985",
-            command=self.open_map,
+            fg_color=primary_color,
+            hover_color=hover_color,
+            text_color=text_color,
+            command=self.open_map
         )
-        self.btn_mobile_connect.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
+        self.btn_view_map.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
 
         # Zone de statut en bas de la sidebar
         self.status_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
@@ -144,11 +194,14 @@ class InsectDetectorApp(ctk.CTk):
         self.lbl_status = ctk.CTkLabel(
             self.status_frame,
             text=config.MESSAGES.get("ready", "Prêt"),
+            image=self.icons.get("info"),
+            compound="left",
+            padx=10,
             font=ctk.CTkFont(size=12, slant="italic"),
             text_color="gray60",
-            wraplength=220
+            wraplength=200
         )
-        self.lbl_status.pack(pady=5)
+        self.lbl_status.pack(pady=5, fill="x")
 
         # ==================== MAIN VIEW ====================
         self.main_view = ctk.CTkFrame(self, fg_color="transparent")
@@ -259,9 +312,12 @@ class InsectDetectorApp(ctk.CTk):
     def clear_interface(self):
         # Remove image reference
         self.lbl_image.configure(
-            image="",
+            image=None,
             text=config.MESSAGES.get("no_image_selected", "Aucune image sélectionnée")
         )
+        # Clear images refs in CTkLabel to avoid scaling warnings
+        self.lbl_image.configure(image=None)
+        
         # Clear stored references
         # self.current_image_tk = None
         # self.current_pil_image = None
@@ -299,105 +355,124 @@ class InsectDetectorApp(ctk.CTk):
         title = ctk.CTkLabel(
             self.result_scores_container,
             text=title_text,
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(size=20, weight="bold"),
             text_color=("gray10", "gray90")
         )
-        title.grid(row=0, column=0, sticky="w", pady=(5, 15))
-        # self.result_widgets.append(title)
+        title.grid(row=0, column=0, columnspan=2, sticky="w", pady=(10, 20), padx=10)
 
-        row_index = 1
+        # Configurer la grille 2x2
+        self.result_scores_container.grid_columnconfigure((0, 1), weight=1)
 
         # Afficher chaque résultat
-        for level, name, conf, map_url in results_data:
+        for i, (level, name, conf, map_url) in enumerate(results_data):
+            # On s'arrête à 4 pour le 2x2
+            if i >= 4:
+                break
+                
+            is_winner = i == 0
+            card_bg = ("gray80", "gray25") if is_winner else ("gray85", "gray20")
+
             card_frame = ctk.CTkFrame(
                 self.result_scores_container,
-                fg_color=("gray85", "gray20"),
-                corner_radius=8
+                fg_color=card_bg,
+                corner_radius=10,
+                border_width=1 if is_winner else 0,
+                border_color=config.THEME.get("primary_color")
             )
-            card_frame.grid(row=row_index, column=0, sticky="ew", pady=5, padx=5)
-            # self.result_widgets.append(card_frame)
+            # Placement en grille 2x2
+            row = (i // 2) + 1
+            col = i % 2
+            card_frame.grid(row=row, column=col, sticky="ew", pady=4, padx=5)
 
             card_frame.grid_columnconfigure(0, weight=1)
 
-            # Contenu principal de la carte
-            header_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
-            header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 5))
-            header_frame.grid_columnconfigure(0, weight=1)
+            # Contenu principal - Une seule ligne pour gagner de la hauteur
+            content_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
+            content_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=8)
+            content_frame.grid_columnconfigure(0, weight=1)
 
-            # Nom de l'espèce
+            # Infos texte (Nom et Niveau)
+            info_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
+            info_frame.grid(row=0, column=0, sticky="nw")
+
             name_label = ctk.CTkLabel(
-                header_frame,
-                text=f"{level} : {name}",
-                font=ctk.CTkFont(size=15, weight="bold")
+                info_frame,
+                text=name,
+                font=ctk.CTkFont(size=14, weight="bold"),
+                anchor="w",
+                wraplength=120 # Pour gérer les noms longs en grille
             )
-            name_label.grid(row=0, column=0, sticky="w")
+            name_label.pack(side="top", anchor="w")
 
-            # Boutons à droite
-            btn_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
-            btn_frame.grid(row=0, column=1, sticky="e")
+            level_label = ctk.CTkLabel(
+                info_frame,
+                text=level.upper(),
+                font=ctk.CTkFont(size=10, weight="bold"),
+                text_color="gray50"
+            )
+            level_label.pack(side="top", anchor="w")
 
-            # Bouton Wiki
+            # Boutons d'action centrés à droite
+            btn_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
+            btn_frame.grid(row=0, column=1, padx=(5, 0))
+
+            # Wiki
             wiki_btn = ctk.CTkButton(
                 btn_frame,
-                text="🔎 Wiki",
-                width=60,
+                text="",
+                image=self.icons.get("search") if hasattr(self, "icons") else None,
+                width=28,
                 height=28,
-                font=ctk.CTkFont(size=12, weight="bold"),
                 fg_color="#5a5c5c",
                 hover_color="#454747",
                 command=lambda n=name: wikipedia_search.open_web_browser_wikipedia_search(n)
             )
-            wiki_btn.grid(row=0, column=0, padx=(5, 0))
+            wiki_btn.grid(row=0, column=0, padx=1)
 
-            # Bouton Carte (si dispo car changements depuis le dernier model - TODO : migrer vers GBIF)
+            # Carte
             if map_url:
                 map_btn = ctk.CTkButton(
                     btn_frame,
-                    text="🗺️ Carte",
-                    width=60,
+                    text="",
+                    image=self.icons.get("map") if hasattr(self, "icons") else None,
+                    width=28,
                     height=28,
-                    font=ctk.CTkFont(size=12, weight="bold"),
                     fg_color="#2fa572",
                     hover_color="#26885f",
                     command=lambda url=map_url: webbrowser.open(url)
                 )
-                map_btn.grid(row=0, column=1, padx=(5, 0))
+                map_btn.grid(row=0, column=1, padx=1)
 
-            # Barre de progression
-            progress_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
-            progress_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 10))
-            progress_frame.grid_columnconfigure(0, weight=1)
+            # Barre de confiance compacte en bas de la carte
+            progress_container = ctk.CTkFrame(card_frame, fg_color="transparent", height=4)
+            progress_container.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 8))
+            progress_container.grid_columnconfigure(0, weight=1)
 
-            progress_bar = ctk.CTkProgressBar(progress_frame, height=10)
-            progress_bar.grid(row=0, column=0, sticky="ew", padx=(0, 10))
-            progress_bar.set(conf / 100.0)  # Accepte une valeur entre 0 et 1
+            if conf > 80: p_color = "#2fa572"
+            elif conf > 50: p_color = "#d68c22"
+            else: p_color = "#cf3838"
 
-            # Définir la couleur selon la confiance
-            if conf > 80:
-                progress_bar.configure(progress_color="#2fa572")  # Vert
-            elif conf > 50:
-                progress_bar.configure(progress_color="#d68c22")  # Orange
-            else:
-                progress_bar.configure(progress_color="#cf3838")  # Rouge
+            progress_bar = ctk.CTkProgressBar(progress_container, height=6, corner_radius=3)
+            progress_bar.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+            progress_bar.set(conf / 100.0)
+            progress_bar.configure(progress_color=p_color)
 
             progress_label = ctk.CTkLabel(
-                progress_frame,
-                text=f"{conf:.1f}%",
-                font=ctk.CTkFont(size=13, weight="bold"),
-                width=50,
-                anchor="e"
+                progress_container,
+                text=f"{conf:.0f}%",
+                font=ctk.CTkFont(size=11, weight="bold"),
+                text_color=p_color,
+                width=30
             )
             progress_label.grid(row=0, column=1, sticky="e")
-
-            row_index += 1
 
     def open_map(self):
         if not self.has_search_result():
             return
     
         species_name = self.computed_insect_name
-        species_id = get_species_id(species_name)
-        coordinates = get_species_locations(species_id[1]) if species_id else []
+        _, nub_id = get_species_id(species_name)
+        coordinates = get_species_locations(nub_id, count=3000) if nub_id else []
 
         if not coordinates:
             self.update_status(f"No geographic data available for {species_name}")
@@ -505,11 +580,12 @@ class InsectDetectorApp(ctk.CTk):
             if gbif_info and 'url' in gbif_info:
                 status += f" | GBIF: {gbif_info['url']}"
 
-            self.computed_insect_name = f"{names[0]} {names[1]}".strip()
-            species_id = get_species_id(self.computed_insect_name)
-
-            images = get_species_image(species_id)
-            logger.warning(f"Downloading {len(images)}")
+            self.computed_insect_name = f"{names[2]} {names[3]}".strip()
+            species_id, nub_id = get_species_id(self.computed_insect_name)
+            
+            # Use nub_id (TaxonKey) for occurrences & occurrences-based media
+            images = get_species_image(nub_id)
+            logger.debug(f"Media count found: {len(images)}")
             self.api_images_container.display_images_async(images)
 
             self.update_status(status)
@@ -546,9 +622,9 @@ class InsectDetectorApp(ctk.CTk):
 
     def update_map_btn(self):
         if self.has_search_result():
-            self.btn_mobile_connect.configure(state="normal")
+            self.btn_view_map.configure(state="normal")
         else:
-            self.btn_mobile_connect.configure(state="disabled")
+            self.btn_view_map.configure(state="disabled")
 
 
     def update_clear_btn(self):
