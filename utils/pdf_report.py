@@ -160,7 +160,36 @@ def _build_styles():
             fontName="Helvetica", fontSize=8.5,
             textColor=GREY_DARK, leading=12,
         ),
+        "wiki_heading": ParagraphStyle(
+            "wiki_heading", parent=base["Normal"],
+            fontName="Helvetica-Bold", fontSize=9.5,
+            textColor=GREEN_MID, spaceBefore=8, spaceAfter=2,
+        ),
     }
+
+
+# ── Wikipedia parser ──────────────────────────────────────────────────────────
+
+def _parse_wikipedia(text: str, styles: dict):
+    """Split a Wikipedia summary on == Section == markers into styled flowables."""
+    import re
+    from reportlab.platypus import Spacer, Paragraph
+
+    flowables = []
+    # Split on == Title == patterns (keep the delimiters as group)
+    parts = re.split(r'==\s*(.+?)\s*==', text)
+    # parts[0] = intro text, then alternating: heading, body, heading, body...
+    for i, part in enumerate(parts):
+        part = part.strip()
+        if not part:
+            continue
+        if i % 2 == 0:
+            # Body text
+            flowables.append(Paragraph(part, styles["wiki_body"]))
+        else:
+            # Section heading
+            flowables.append(Paragraph(part, styles["wiki_heading"]))
+    return flowables
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -285,16 +314,18 @@ def create_pdf_report(
     if wikipedia_summary:
         story.append(HRFlowable(width="100%", thickness=0.8, color=GREEN_PALE, spaceAfter=4))
         story.append(Paragraph("Résumé Wikipedia", styles["section"]))
-        wt = Table([[Paragraph(wikipedia_summary, styles["wiki_body"])]], colWidths=[content_w])
-        wt.setStyle(TableStyle([
+        wiki_flowables = _parse_wikipedia(wikipedia_summary, styles)
+        # Wrap all flowables in a single styled container table
+        wiki_inner = Table([[wiki_flowables]], colWidths=[content_w - 0.4 * cm])
+        wiki_inner.setStyle(TableStyle([
             ("BACKGROUND",   (0, 0), (-1, -1), GREY_LIGHT),
-            ("LEFTPADDING",  (0, 0), (-1, -1), 10),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 10),
-            ("TOPPADDING",   (0, 0), (-1, -1), 8),
-            ("BOTTOMPADDING",(0, 0), (-1, -1), 8),
+            ("LEFTPADDING",  (0, 0), (-1, -1), 12),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+            ("TOPPADDING",   (0, 0), (-1, -1), 10),
+            ("BOTTOMPADDING",(0, 0), (-1, -1), 10),
             ("LINEBEFORE",   (0, 0), (0, -1), 3, GREEN_LIGHT),
         ]))
-        story.append(wt)
+        story.append(wiki_inner)
         story.append(Spacer(1, 0.3 * cm))
 
     # ── Species table ─────────────────────────────────────────────────────────
