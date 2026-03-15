@@ -175,6 +175,7 @@ class InsectDetectorApp(ctk.CTk):
     def clear_results(self):
         """Clears all result widgets"""
         self.main_view.clear_results()
+        self.sidebar.set_gbif_link(None)
 
         # Disables the map and erase buttons (since no results to display)
         self.update_map_btn()
@@ -295,8 +296,10 @@ class InsectDetectorApp(ctk.CTk):
                 level = levels[i]
                 name = names[i]
                 conf = confidences[i]
-                map_url = gbif_info.get('url') if i == 3 and gbif_info else None
-                results_data.append((level, name, conf, map_url))
+                results_data.append((level, name, conf, None))
+
+            gbif_url = gbif_info.get('url') if gbif_info else None
+            self.sidebar.set_gbif_link(gbif_url)
 
             status = f"Confiance: {avg_conf:.1f}% - {'Fiable ✅' if reliable else 'Incertain ⚠️'}"
             if gbif_info and 'url' in gbif_info:

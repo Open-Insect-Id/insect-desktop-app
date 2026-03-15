@@ -1,4 +1,5 @@
 import os
+import webbrowser
 import customtkinter as ctk
 import config
 from utils.logger import setup_logger
@@ -9,10 +10,10 @@ class Sidebar(ctk.CTkFrame):
     def __init__(self, master, icons, **kwargs):
         super().__init__(master, width=260, corner_radius=0, **kwargs)
         self.icons = icons
+        self.gbif_url = None
         
         # Grille
-        # Use the last row for status bar stretch
-        self.grid_rowconfigure(7, weight=1)
+        self.grid_rowconfigure(8, weight=1)
 
         # Récupération des styles depuis config.py
         btn_height = config.THEME.get("btn_height", 45)
@@ -99,6 +100,21 @@ class Sidebar(ctk.CTkFrame):
         )
         self.btn_view_map.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
 
+        self.btn_gbif = ctk.CTkButton(
+            self,
+            text="Lien vers GBIF",
+            image=self.icons.get("map"),
+            compound="left",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=btn_height,
+            fg_color=primary_color,
+            hover_color=hover_color,
+            text_color=text_color,
+            command=lambda: webbrowser.open(self.gbif_url) if self.gbif_url else None,
+            state="disabled",
+        )
+        self.btn_gbif.grid(row=6, column=0, padx=20, pady=10, sticky="ew")
+
         self.btn_journal = ctk.CTkButton(
             self,
             text=config.MESSAGES.get("button_journal", "Journal d'observation"),
@@ -111,11 +127,11 @@ class Sidebar(ctk.CTkFrame):
             text_color=text_color,
             command=master.open_observation_journal
         )
-        self.btn_journal.grid(row=6, column=0, padx=20, pady=10, sticky="ew")
+        self.btn_journal.grid(row=7, column=0, padx=20, pady=10, sticky="ew")
 
         # Zone de statut en bas de la sidebar
         self.status_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.status_frame.grid(row=7, column=0, padx=20, pady=20, sticky="ew")
+        self.status_frame.grid(row=8, column=0, padx=20, pady=20, sticky="ew")
         
         self.lbl_status = ctk.CTkLabel(
             self.status_frame,
@@ -140,3 +156,11 @@ class Sidebar(ctk.CTkFrame):
 
     def set_map_state(self, state):
         self.btn_view_map.configure(state=state)
+
+    def set_gbif_link(self, url: str | None):
+        """Enable/disable the GBIF button depending on URL availability."""
+        self.gbif_url = url
+        if url:
+            self.btn_gbif.configure(state="normal")
+        else:
+            self.btn_gbif.configure(state="disabled")

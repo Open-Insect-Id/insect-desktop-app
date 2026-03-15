@@ -171,19 +171,6 @@ class MainView(ctk.CTkFrame):
             )
             wiki_btn.grid(row=0, column=0, padx=1)
 
-            if map_url:
-                map_btn = ctk.CTkButton(
-                    btn_frame,
-                    text="",
-                    image=self.icons.get("map"),
-                    width=28,
-                    height=28,
-                    fg_color="#2fa572",
-                    hover_color="#26885f",
-                    command=lambda url=map_url: webbrowser.open(url)
-                )
-                map_btn.grid(row=0, column=1, padx=1)
-
             progress_container = ctk.CTkFrame(card_frame, fg_color="transparent", height=4)
             progress_container.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 8))
             progress_container.grid_columnconfigure(0, weight=1)
