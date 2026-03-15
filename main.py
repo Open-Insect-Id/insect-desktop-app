@@ -76,6 +76,13 @@ def main():
     except Exception as e:
         logger.warning(f"Impossible d'initialiser la base d'observations: {e}")
 
+    # Initialiser les valeurs de configuration qui peuvent être changées dans les paramètres
+    with open("utils/settings.txt") as settings:
+        THEME["primary_color"] = settings.readline()[0:7]
+        THEME["hover_color"] = settings.readline()[0:7]
+        THEME["background"] = settings.readline()[0:7]
+        THEME["text"] = settings.readline()[0:7]
+
     # Lancer l'interface en injectant la session et les métadonnées
     app = InsectDetectorApp(session, input_name, output_name, input_size, species_list, hierarchy)
     app.mainloop()

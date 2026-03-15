@@ -6,7 +6,7 @@ to logs very low impact things
 
 import logging
 from pathlib import Path
-from typing import Any, cast, override
+from typing import Any, cast
 
 from colorama import Fore, Style
 from colorama import init as colorama_init
@@ -61,7 +61,6 @@ class ColoredFormatter(logging.Formatter):
         "CRITICAL": Fore.RED + Style.BRIGHT,
     }
 
-    @override
     def format(self, record: logging.LogRecord) -> str:
         color: str = self.COLORS.get(record.levelname, "")
         reset: str = Style.RESET_ALL

@@ -29,3 +29,4 @@ Werkzeug
 wikipedia
 xyzservices
 cairosvg
+reportlab

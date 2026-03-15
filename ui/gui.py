@@ -20,6 +20,7 @@ from model.model import process_image
 from ui.sidebar import Sidebar
 from ui.main_view import MainView
 from ui.observation_journal import ObservationJournalWindow
+from ui.settings import SettingsWindow
 
 logger = setup_logger(__name__)
 
@@ -70,6 +71,7 @@ class InsectDetectorApp(ctk.CTk):
         self.mobile_image_queue = None
         self.mobile_window = None
         self.journal_window = None
+        self.settings_window = None
 
         # --- Charger les icônes ---
         self.load_icons()
@@ -236,6 +238,21 @@ class InsectDetectorApp(ctk.CTk):
         except Exception as e:
             logger.error("Failed to open observation journal: %s", e)
             self.update_status("Impossible d'ouvrir le journal d'observation")
+
+    def open_settings(self):
+        """Opens the settings window."""
+        if self.settings_window and getattr(self.settings_window, 'winfo_exists', lambda: False)():
+            try:
+                self.settings_window.lift()
+                return
+            except Exception:
+                pass
+
+        try:
+            self.settings_window = SettingsWindow(self)
+        except Exception as e:
+            logger.error("Failed to open settings: %s", e)
+            self.update_status("Impossible d'ouvrir les paramètres")
 
     def export_report(self):
         """Export a PDF report for the last analysis."""

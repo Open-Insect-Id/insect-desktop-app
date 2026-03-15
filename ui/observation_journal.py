@@ -2,6 +2,7 @@ import io
 import os
 import platform
 import webbrowser
+import config
 
 from PIL import Image
 import customtkinter as ctk
@@ -56,6 +57,7 @@ class ObservationJournalWindow(ctk.CTkToplevel):
         self.resizable(True, True)
         self._build_ui()
         self.refresh()
+        
 
     def _delete_and_refresh(self, observation_id: int) -> None:
         """Delete an entry from the database and refresh the view."""
@@ -68,6 +70,8 @@ class ObservationJournalWindow(ctk.CTkToplevel):
     def _build_ui(self):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
+
+        primary = config.THEME.get("primary_color")
 
         top_bar = ctk.CTkFrame(self, fg_color="transparent")
         top_bar.grid(row=0, column=0, sticky="ew", padx=16, pady=(16, 8))
@@ -88,6 +92,7 @@ class ObservationJournalWindow(ctk.CTkToplevel):
             text="Rafraîchir",
             width=120,
             command=self.refresh,
+            fg_color=primary,
         )
         self.btn_refresh.pack(side="right", padx=(0, 6))
 
@@ -96,6 +101,7 @@ class ObservationJournalWindow(ctk.CTkToplevel):
             text="Fermer",
             width=120,
             command=self.destroy,
+            fg_color=primary,
         )
         self.btn_close.pack(side="right")
 
@@ -200,6 +206,7 @@ class ObservationJournalWindow(ctk.CTkToplevel):
                     text="Ouvrir l'image",
                     width=140,
                     command=lambda p=path: _open_file(p) if p else None,
+                    fg_color=config.THEME.get("primary_color"),
                 )
                 btn_open.grid(row=0, column=0, padx=(0, 6))
 
