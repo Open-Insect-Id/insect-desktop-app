@@ -168,6 +168,10 @@ class InsectDetectorApp(ctk.CTk):
         self.main_view.clear_image()
         self.image_path = None
 
+        self.computed_insect_name = None
+        self.species_id = None
+        self.species_info = None
+
         self.sidebar.set_analyze_state("disabled")
         self.clear_results()
         self.update_status(self._status_message('ready'))
@@ -184,6 +188,7 @@ class InsectDetectorApp(ctk.CTk):
     def display_results(self, results_data):
         self.main_view.display_results(results_data)
         # If there are results, enable the map and erase buttons
+        self.update_map_btn()
         self.update_clear_btn()
 
     def open_map(self):
