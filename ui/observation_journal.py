@@ -6,7 +6,7 @@ import webbrowser
 from PIL import Image
 import customtkinter as ctk
 
-from utils.observation_db import fetch_observations
+from utils.observation_db import delete_observation, fetch_observations
 
 
 def _open_file(path: str) -> None:
@@ -57,6 +57,14 @@ class ObservationJournalWindow(ctk.CTkToplevel):
         self._build_ui()
         self.refresh()
 
+    def _delete_and_refresh(self, observation_id: int) -> None:
+        """Delete an entry from the database and refresh the view."""
+        try:
+            delete_observation(observation_id)
+        except Exception:
+            pass
+        self.refresh()
+
     def _build_ui(self):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
@@ -101,6 +109,8 @@ class ObservationJournalWindow(ctk.CTkToplevel):
     def refresh(self):
         for widget in self.scroll.winfo_children():
             widget.destroy()
+        # Clean up any stored images to avoid holding memory after refresh
+        self._thumb_images.clear()
 
         observations = fetch_observations()
         if not observations:
@@ -179,14 +189,29 @@ class ObservationJournalWindow(ctk.CTkToplevel):
             status_label.grid(row=2, column=1, sticky="w", padx=(12, 6), pady=(0, 12))
 
             # Action buttons
-            if path and os.path.exists(path):
-                btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
-                btn_frame.grid(row=0, column=2, rowspan=3, sticky="e", padx=(0, 12), pady=10)
+            btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
+            btn_frame.grid(row=0, column=2, rowspan=3, sticky="e", padx=(0, 12), pady=10)
+            btn_frame.grid_columnconfigure(0, weight=0)
+            btn_frame.grid_columnconfigure(1, weight=0)
 
+            if path and os.path.exists(path):
                 btn_open = ctk.CTkButton(
                     btn_frame,
                     text="Ouvrir l'image",
                     width=140,
                     command=lambda p=path: _open_file(p) if p else None,
                 )
-                btn_open.pack(side="top", pady=(0, 8))
+                btn_open.grid(row=0, column=0, padx=(0, 6))
+
+            # Delete / remove entry from history
+            obs_id = obs.get("id")
+            if obs_id is not None:
+                btn_delete = ctk.CTkButton(
+                    btn_frame,
+                    text="✖",
+                    width=30,
+                    fg_color="#bf1f1f",
+                    hover_color="#a31c1c",
+                    command=lambda i=obs_id: self._delete_and_refresh(i),
+                )
+                btn_delete.grid(row=0, column=1)
