@@ -1,7 +1,9 @@
+import io
 import os
 import platform
 import webbrowser
 
+from PIL import Image
 import customtkinter as ctk
 
 from utils.observation_db import fetch_observations
@@ -26,6 +28,24 @@ def _open_file(path: str) -> None:
             pass
 
 
+def _load_placeholder_image(size=(86, 86)) -> ctk.CTkImage:
+    """Load the SVG placeholder"""
+    base = os.path.dirname(__file__)
+    svg_path = os.path.join(base, "icons", "No-Image-Placeholder.svg")
+
+    # Try to load the SVG using cairosvg if installed
+    try:
+        import cairosvg
+
+        png_bytes = cairosvg.svg2png(url=svg_path, output_width=size[0], output_height=size[1])
+        img = Image.open(io.BytesIO(png_bytes)).convert("RGBA")
+        return ctk.CTkImage(light_image=img, dark_image=img, size=size)
+    except Exception:
+        # Fallback: simple gray box
+        img = Image.new("RGBA", size, (60, 60, 60, 255))
+        return ctk.CTkImage(light_image=img, dark_image=img, size=size)
+
+
 class ObservationJournalWindow(ctk.CTkToplevel):
     """Window displaying the observation history."""
 
@@ -39,18 +59,21 @@ class ObservationJournalWindow(ctk.CTkToplevel):
 
     def _build_ui(self):
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=0)
         self.grid_rowconfigure(1, weight=1)
 
+        top_bar = ctk.CTkFrame(self, fg_color="transparent")
+        top_bar.grid(row=0, column=0, sticky="ew", padx=16, pady=(16, 8))
+        top_bar.grid_columnconfigure(0, weight=1)
+
         header = ctk.CTkLabel(
-            self,
+            top_bar,
             text="Historique des analyses",
             font=ctk.CTkFont(size=18, weight="bold"),
         )
-        header.grid(row=0, column=0, sticky="w", padx=16, pady=(16, 8))
+        header.grid(row=0, column=0, sticky="w")
 
-        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
-        btn_frame.grid(row=0, column=1, sticky="e", padx=16, pady=(16, 8))
+        btn_frame = ctk.CTkFrame(top_bar, fg_color="transparent")
+        btn_frame.grid(row=0, column=1, sticky="e")
 
         self.btn_refresh = ctk.CTkButton(
             btn_frame,
@@ -72,6 +95,9 @@ class ObservationJournalWindow(ctk.CTkToplevel):
         self.scroll.grid(row=1, column=0, sticky="nsew", padx=16, pady=(0, 16))
         self.scroll.grid_columnconfigure(0, weight=1)
 
+        self._thumb_images: list[ctk.CTkImage] = []
+        self._placeholder_image = _load_placeholder_image()
+
     def refresh(self):
         for widget in self.scroll.winfo_children():
             widget.destroy()
@@ -80,7 +106,7 @@ class ObservationJournalWindow(ctk.CTkToplevel):
         if not observations:
             empty = ctk.CTkLabel(
                 self.scroll,
-                text="Aucun enregistrement pour le moment.",
+                text="📭 Aucun enregistrement pour le moment.",
                 font=ctk.CTkFont(size=14),
                 text_color="gray60",
             )
@@ -88,34 +114,79 @@ class ObservationJournalWindow(ctk.CTkToplevel):
             return
 
         for idx, obs in enumerate(observations):
-            frame = ctk.CTkFrame(self.scroll, corner_radius=10)
+            frame = ctk.CTkFrame(
+                self.scroll,
+                corner_radius=12,
+                border_width=1,
+                border_color=("gray40", "gray30"),
+                fg_color=("#1e1e1e", "#1a1a1a"),
+            )
             frame.grid(row=idx, column=0, sticky="ew", padx=10, pady=6)
+            frame.grid_columnconfigure(0, weight=0)
             frame.grid_columnconfigure(1, weight=1)
+            frame.grid_columnconfigure(2, weight=0)
 
-            # Left: timestamp + species
-            info_text = f"{obs.get('timestamp', '')}  |  {obs.get('species', 'N/A')}"
-            label = ctk.CTkLabel(frame, text=info_text, anchor="w")
-            label.grid(row=0, column=0, columnspan=2, sticky="ew", padx=12, pady=(10, 4))
+            # Thumbnail (optimised, if available)
+            thumb = None
+            path = obs.get("image_path")
+            if path and os.path.exists(path):
+                try:
+                    img = Image.open(path)
+                    img.thumbnail((86, 86), Image.LANCZOS)
+                    thumb = ctk.CTkImage(light_image=img, dark_image=img, size=img.size)
+                    self._thumb_images.append(thumb)
+                except Exception:
+                    thumb = None
 
-            confidence = obs.get('confidence')
-            reliable = obs.get('reliable')
-            reliable_text = "Oui" if reliable else "Non"
-            confidence_text = f"Confiance: {confidence:.1f}%" if confidence is not None else "Confiance: -"
+            if thumb:
+                thumb_label = ctk.CTkLabel(frame, image=thumb, text="")
+            else:
+                thumb_label = ctk.CTkLabel(frame, image=self._placeholder_image, text="")
+            thumb_label.grid(row=0, column=0, rowspan=3, sticky="nsw", padx=12, pady=10)
 
-            sublabel = ctk.CTkLabel(
+            # Info principal (espèce + date)
+            species = obs.get("species") or "N/A"
+            timestamp = obs.get("timestamp", "")
+            species_label = ctk.CTkLabel(
                 frame,
-                text=f"{confidence_text}  |  Fiable: {reliable_text}",
-                font=ctk.CTkFont(size=11),
+                text=species,
+                font=ctk.CTkFont(size=14, weight="bold"),
+                anchor="w",
+            )
+            species_label.grid(row=0, column=1, sticky="w", padx=(12, 6), pady=(10, 4))
+
+            timestamp_label = ctk.CTkLabel(
+                frame,
+                text=timestamp,
+                font=ctk.CTkFont(size=10),
                 text_color="gray60",
                 anchor="w",
             )
-            sublabel.grid(row=1, column=0, columnspan=2, sticky="ew", padx=12, pady=(0, 10))
+            timestamp_label.grid(row=1, column=1, sticky="w", padx=(12, 6), pady=(0, 10))
 
-            # Buttons
-            btn_open = ctk.CTkButton(
+            # Statuts
+            confidence = obs.get("confidence")
+            reliable = obs.get("reliable")
+            reliable_text = "✅ Fiable" if reliable else "⚠️ Incertain"
+            confidence_text = f"Confiance: {confidence:.1f}%" if confidence is not None else "Confiance: -"
+            status_label = ctk.CTkLabel(
                 frame,
-                text="Ouvrir l'image",
-                width=140,
-                command=lambda p=obs.get('image_path'): _open_file(p) if p else None,
+                text=f"{confidence_text}  •  {reliable_text}",
+                font=ctk.CTkFont(size=11),
+                text_color="gray70",
+                anchor="w",
             )
-            btn_open.grid(row=0, column=2, rowspan=2, padx=(0, 12), pady=10)
+            status_label.grid(row=2, column=1, sticky="w", padx=(12, 6), pady=(0, 12))
+
+            # Action buttons
+            if path and os.path.exists(path):
+                btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
+                btn_frame.grid(row=0, column=2, rowspan=3, sticky="e", padx=(0, 12), pady=10)
+
+                btn_open = ctk.CTkButton(
+                    btn_frame,
+                    text="Ouvrir l'image",
+                    width=140,
+                    command=lambda p=path: _open_file(p) if p else None,
+                )
+                btn_open.pack(side="top", pady=(0, 8))
