@@ -58,7 +58,6 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
             response = session.get(url, timeout=10)
             response.raise_for_status()
             pil_image = Image.open(BytesIO(response.content))
-            pil_image.thumbnail((150, 150))
         except Exception as e:
             print(f"Error loading image from {url}: {e}")
             return None
@@ -98,6 +97,19 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
         # Switch back to main thread
         self.after(0, lambda: self._display_loaded_images(loaded))
 
+    def _open_image_popup(self, image: Image.Image):
+        popup = ctk.CTkToplevel(self)
+        popup.title("Image agrandie")
+        popup.geometry("850x850")
+
+        display_image = image.copy()
+        display_image.thumbnail((800, 800))
+
+        popup_image = ctk.CTkImage(light_image=display_image, dark_image=display_image, size=display_image.size)
+        label = ctk.CTkLabel(popup, image=popup_image, text="")
+        label.pack(expand=True, fill="both", padx=10, pady=10)
+        popup._popup_image_ref = popup_image
+
     def _display_loaded_images(self, pil_images):
         # Remove loading widgets
         if self.loading_label:
@@ -116,11 +128,14 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
 
         columns = 3
 
-        for index, pil_image in enumerate(pil_images):
+        for index, full_image in enumerate(pil_images):
+            thumb = full_image.copy()
+            thumb.thumbnail((150, 150))
+
             ctk_image = ctk.CTkImage(
-                light_image=pil_image,
-                dark_image=pil_image,
-                size=pil_image.size
+                light_image=thumb,
+                dark_image=thumb,
+                size=thumb.size
             )
 
             label = ctk.CTkLabel(self, image=ctk_image, text="")
@@ -128,4 +143,8 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
             col = index % columns
             label.grid(row=row, column=col, padx=5, pady=5)
 
+            # Open larger view on click
+            label.bind("<Button-1>", lambda e, img=full_image: self._open_image_popup(img))
+
+            # Keep a reference so the image stays visible
             self.images_refs.append(ctk_image)
