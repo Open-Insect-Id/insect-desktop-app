@@ -71,20 +71,6 @@ class Sidebar(ctk.CTkFrame):
         )
         self.btn_clear.grid(row=3, column=0, padx=20, pady=10, sticky="ew")
 
-        self.btn_mobile_connect = ctk.CTkButton(
-            self,
-            text="Mobile Connect",
-            image=self.icons.get("mobile"),
-            compound="left",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            height=btn_height,
-            fg_color=primary_color,
-            hover_color=hover_color,
-            text_color=text_color,
-            command=master.start_mobile_connect,
-        )
-        self.btn_mobile_connect.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
-
         self.btn_view_map = ctk.CTkButton(
             self,
             text="View map",
@@ -98,7 +84,7 @@ class Sidebar(ctk.CTkFrame):
             text_color=text_color,
             command=master.open_map
         )
-        self.btn_view_map.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
+        self.btn_view_map.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
 
         self.btn_gbif = ctk.CTkButton(
             self,
@@ -113,7 +99,21 @@ class Sidebar(ctk.CTkFrame):
             command=lambda: webbrowser.open(self.gbif_url) if self.gbif_url else None,
             state="disabled",
         )
-        self.btn_gbif.grid(row=6, column=0, padx=20, pady=10, sticky="ew")
+        self.btn_gbif.grid(row=5, column=0, padx=20, pady=10, sticky="ew")
+
+        self.btn_mobile_connect = ctk.CTkButton(
+            self,
+            text="Mobile Connect",
+            image=self.icons.get("mobile"),
+            compound="left",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=btn_height,
+            fg_color=primary_color,
+            hover_color=hover_color,
+            text_color=text_color,
+            command=master.start_mobile_connect,
+        )
+        self.btn_mobile_connect.grid(row=6, column=0, padx=20, pady=10, sticky="ew")
 
         self.btn_journal = ctk.CTkButton(
             self,
