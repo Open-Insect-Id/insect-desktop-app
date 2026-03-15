@@ -7,6 +7,7 @@ import json
 from config import *
 from ui.gui import InsectDetectorApp
 from utils.logger import setup_logger
+from utils.observation_db import init_db
 from model.model import load_model
 
 logger = setup_logger(__name__)
@@ -68,6 +69,12 @@ def main():
         input_size = (224, 224)
 
     species_list, hierarchy = load_hierarchy(hierarchy_path)
+
+    # Initialiser la base de données d'observations
+    try:
+        init_db()
+    except Exception as e:
+        logger.warning(f"Impossible d'initialiser la base d'observations: {e}")
 
     # Lancer l'interface en injectant la session et les métadonnées
     app = InsectDetectorApp(session, input_name, output_name, input_size, species_list, hierarchy)

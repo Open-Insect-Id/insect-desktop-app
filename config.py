@@ -126,6 +126,7 @@ MESSAGES = {
     "button_clear": "Effacer",
     "no_image_selected": "Aucune image sélectionnée",
     "results_title": "RÉSULTATS DE L'ANALYSE",
+    "button_journal": "Journal d'observation",
     "geo_missing": "Aucune donnée géographique pour {name}"
 }
 
@@ -144,5 +145,8 @@ LOGGING_LEVEL_CONSOLE: int = 5  # Verbose
 LOGGING_LEVEL_LOGFILES: int = 5  # Verbose
 
 LOGS_DIR = Path("logs")
+
+# Base database used to store user analysis history (journal d'observation)
+OBSERVATION_DB_PATH = Path("observations.db")
 
 LOGS_CONSOLE_GLOBALLY = True

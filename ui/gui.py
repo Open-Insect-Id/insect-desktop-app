@@ -1,6 +1,7 @@
 import os
 import random
 import webbrowser
+from datetime import datetime
 from queue import Empty
 from tkinter import filedialog
 
@@ -12,10 +13,12 @@ from utils import wikipedia_search
 from utils.gbif_api import get_species_id, get_species_image, get_species_locations
 from utils.logger import setup_logger
 from utils.map_viewer import open_map_in_browser
+from utils.observation_db import add_observation
 from mobile_server.server import IMAGE_QUEUE
 from model.model import process_image
 from ui.sidebar import Sidebar
 from ui.main_view import MainView
+from ui.observation_journal import ObservationJournalWindow
 
 logger = setup_logger(__name__)
 
@@ -58,6 +61,7 @@ class InsectDetectorApp(ctk.CTk):
 
         self.mobile_image_queue = None
         self.mobile_window = None
+        self.journal_window = None
 
         # --- Charger les icônes ---
         self.load_icons()
@@ -195,6 +199,21 @@ class InsectDetectorApp(ctk.CTk):
 
         open_map_in_browser(species_name, coordinates)
 
+    def open_observation_journal(self):
+        """Opens the observation history window."""
+        if self.journal_window and getattr(self.journal_window, 'winfo_exists', lambda: False)():
+            try:
+                self.journal_window.lift()
+                return
+            except Exception:
+                pass
+
+        try:
+            self.journal_window = ObservationJournalWindow(self)
+        except Exception as e:
+            logger.error("Failed to open observation journal: %s", e)
+            self.update_status("Impossible d'ouvrir le journal d'observation")
+
     # ====== Mobile Integration ======
     def start_mobile_connect(self):
         # if window already exists, just bring to front
@@ -291,6 +310,18 @@ class InsectDetectorApp(ctk.CTk):
             self.main_view.api_images_container.display_images_async(images)
 
             self.update_status(status)
+
+            # Enregistrer l'observation dans le journal
+            try:
+                add_observation(
+                    image_path=self.image_path,
+                    species_name=self.computed_insect_name,
+                    confidence=avg_conf,
+                    reliable=reliable,
+                )
+            except Exception as e:
+                logger.warning("Impossible d'enregistrer l'observation: %s", e)
+
             self.display_results(results_data)
 
         except Exception as e:
