@@ -3,7 +3,7 @@ import random
 import webbrowser
 from datetime import datetime
 from queue import Empty
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 from PIL import Image
@@ -14,6 +14,7 @@ from utils.gbif_api import get_species_id, get_species_image, get_species_locati
 from utils.logger import setup_logger
 from utils.map_viewer import open_map_in_browser
 from utils.observation_db import add_observation
+from utils.pdf_report import create_pdf_report
 from mobile_server.server import IMAGE_QUEUE
 from model.model import process_image
 from ui.sidebar import Sidebar
@@ -58,6 +59,13 @@ class InsectDetectorApp(ctk.CTk):
         self.current_pil_image = None
         self.current_image_tk = None
         self.analyzing = False
+
+        # Derniers résultats de l'analyse (pour l'export PDF)
+        self.last_results_data = None
+        self.last_wikipedia_summary = None
+        self.last_avg_conf = None
+        self.last_reliable = None
+        self.last_gbif_url = None
 
         self.mobile_image_queue = None
         self.mobile_window = None
@@ -180,6 +188,14 @@ class InsectDetectorApp(ctk.CTk):
         """Clears all result widgets"""
         self.main_view.clear_results()
         self.sidebar.set_gbif_link(None)
+        self.sidebar.set_export_state("disabled")
+
+        # Reset last-analysis state
+        self.last_results_data = None
+        self.last_wikipedia_summary = None
+        self.last_avg_conf = None
+        self.last_reliable = None
+        self.last_gbif_url = None
 
         # Disables the map and erase buttons (since no results to display)
         self.update_map_btn()
@@ -190,6 +206,7 @@ class InsectDetectorApp(ctk.CTk):
         # If there are results, enable the map and erase buttons
         self.update_map_btn()
         self.update_clear_btn()
+        self.sidebar.set_export_state("normal")
 
     def open_map(self):
         if not self.has_search_result():
@@ -219,6 +236,41 @@ class InsectDetectorApp(ctk.CTk):
         except Exception as e:
             logger.error("Failed to open observation journal: %s", e)
             self.update_status("Impossible d'ouvrir le journal d'observation")
+
+    def export_report(self):
+        """Export a PDF report for the last analysis."""
+        if not self.last_results_data or not self.image_path:
+            self.update_status("Pas de résultat à exporter")
+            messagebox.showinfo("Exporter en PDF", "Aucun résultat disponible pour exporter. Analysez d'abord une image.")
+            return
+
+        suggested_name = self.computed_insect_name or "rapport"
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("PDF", "*.pdf")],
+            initialfile=f"{suggested_name}.pdf",
+            title="Exporter en PDF",
+        )
+        if not file_path:
+            return
+
+        try:
+            create_pdf_report(
+                output_path=file_path,
+                image_path=self.image_path,
+                species_name=self.computed_insect_name,
+                results_data=self.last_results_data,
+                avg_conf=self.last_avg_conf,
+                reliable=self.last_reliable,
+                gbif_url=self.last_gbif_url,
+                wikipedia_summary=self.last_wikipedia_summary,
+            )
+            self.update_status(f"Rapport exporté : {os.path.basename(file_path)}")
+            messagebox.showinfo("Exporter en PDF", f"Rapport généré avec succès:\n{file_path}")
+        except Exception as e:
+            logger.error("Erreur lors de l'export PDF: %s", e)
+            self.update_status("Échec de l'export PDF")
+            messagebox.showerror("Exporter en PDF", f"Impossible d'exporter le rapport:\n{e}")
 
     # ====== Mobile Integration ======
     def start_mobile_connect(self):
@@ -313,6 +365,16 @@ class InsectDetectorApp(ctk.CTk):
             self.computed_insect_name = f"{names[2]} {names[3]}".strip()
             species_id, nub_id = get_species_id(self.computed_insect_name)
             
+            # Store last analysis data for export
+            self.last_results_data = results_data
+            self.last_avg_conf = avg_conf
+            self.last_reliable = reliable
+            self.last_gbif_url = gbif_url
+            try:
+                self.last_wikipedia_summary = wikipedia_search.summarize_wikipedia_page(self.computed_insect_name)
+            except Exception:
+                self.last_wikipedia_summary = None
+
             images = get_species_image(nub_id)
             logger.debug(f"Media count found: {len(images)}")
 
