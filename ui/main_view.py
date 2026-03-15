@@ -70,6 +70,12 @@ class MainView(ctk.CTkFrame):
             image=None,
             text=config.MESSAGES.get("no_image_selected", "Aucune image sélectionnée")
         )
+        try:
+            self.lbl_image._label.configure(image="")
+        except Exception:
+            pass
+        self.current_image_tk = None
+        self.current_pil_image = None
         self.lbl_image.update_idletasks()
 
     def clear_results(self):
