@@ -15,7 +15,12 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
         self.loading_bar = None
         self._image_cache: dict[str, Image.Image] = {}
         self._cache_lock = threading.Lock()
-        self.grid_columnconfigure((0, 1, 2), weight=1)
+        self._columns = 3
+        self._configure_grid()
+
+    def _configure_grid(self):
+        for col in range(self._columns):
+            self.grid_columnconfigure(col, weight=1, minsize=170)
 
     def display_images_async(self, images: list):
         # Clear previous content
@@ -25,16 +30,16 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
         self.images_refs.clear()
 
         if not images:
-            ctk.CTkLabel(self, text="Pas d'images trouvées", font=ctk.CTkFont(slant="italic")).grid(row=0, column=0, columnspan=3, padx=20, pady=20)
+            ctk.CTkLabel(self, text="Pas d'images trouvées", font=ctk.CTkFont(slant="italic")).grid(row=0, column=0, columnspan=self._columns, padx=20, pady=20)
             return
 
         # Show loading text + progress bar
         self.loading_label = ctk.CTkLabel(self, text="Chargement des images… (0/{})".format(len(images)))
-        self.loading_label.grid(row=0, column=0, columnspan=3, padx=20, pady=(20, 5))
+        self.loading_label.grid(row=0, column=0, columnspan=self._columns, padx=20, pady=(20, 5))
 
         self.loading_bar = ctk.CTkProgressBar(self, width=250)
         self.loading_bar.set(0)
-        self.loading_bar.grid(row=1, column=0, columnspan=3, padx=20, pady=(0, 20))
+        self.loading_bar.grid(row=1, column=0, columnspan=self._columns, padx=20, pady=(0, 20))
 
         # Force UI redraw so the loading indicators appear immediately
         self.update_idletasks()
@@ -79,23 +84,32 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
             self.loading_bar = None
 
     def _load_images_worker(self, images: list):
-        loaded: list[Image.Image] = []
+        # Keep results in input order to preserve the intended layout
+        loaded: list[Image.Image | None] = [None] * len(images)
         total = len(images)
         loaded_count = 0
 
         with requests.Session() as session:
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-                futures = [executor.submit(self._fetch_image, url, session) for url in images]
+                futures = {
+                    executor.submit(self._fetch_image, url, session): idx
+                    for idx, url in enumerate(images)
+                }
+
                 for future in concurrent.futures.as_completed(futures):
+                    idx = futures[future]
                     result = future.result()
                     if result:
-                        loaded.append(result)
+                        loaded[idx] = result
                         loaded_count += 1
                         # Update the loading label on the main thread
                         self.after(0, lambda lc=loaded_count, tot=total: self._update_loading_label(lc, tot))
 
+        # Filter out any None entries (failed downloads)
+        ordered_images = [img for img in loaded if img is not None]
+
         # Switch back to main thread
-        self.after(0, lambda: self._display_loaded_images(loaded))
+        self.after(0, lambda: self._display_loaded_images(ordered_images))
 
     def _open_image_popup(self, image: Image.Image):
         popup = ctk.CTkToplevel(self)
@@ -126,7 +140,10 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
                 pass
             self.loading_bar = None
 
-        columns = 3
+        columns = self._columns
+        rows = (len(pil_images) + columns - 1) // columns
+        for row in range(rows):
+            self.grid_rowconfigure(row, weight=1, minsize=170)
 
         for index, full_image in enumerate(pil_images):
             thumb = full_image.copy()
@@ -138,10 +155,16 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
                 size=thumb.size
             )
 
-            label = ctk.CTkLabel(self, image=ctk_image, text="")
+            # Use a frame to better align thumbnails because it's coooool
+            cell = ctk.CTkFrame(self, fg_color=("gray92", "gray18"), corner_radius=10, border_width=1, border_color=("gray70", "gray25"))
             row = index // columns
             col = index % columns
-            label.grid(row=row, column=col, padx=5, pady=5)
+            cell.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+            cell.grid_rowconfigure(0, weight=1)
+            cell.grid_columnconfigure(0, weight=1)
+
+            label = ctk.CTkLabel(cell, image=ctk_image, text="")
+            label.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
             # Open larger view on click
             label.bind("<Button-1>", lambda e, img=full_image: self._open_image_popup(img))
