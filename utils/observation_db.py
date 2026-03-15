@@ -64,6 +64,16 @@ def add_observation(
         conn.commit()
 
 
+def delete_observation(observation_id: int) -> None:
+    """Delete a single observation record by its ID."""
+    db_path = get_db_path()
+
+    with sqlite3.connect(db_path) as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM observations WHERE id = ?", (observation_id,))
+        conn.commit()
+
+
 def fetch_observations(limit: int | None = None) -> list[dict]:
     """Return all observations as a list of dicts, newest first."""
     db_path = get_db_path()
