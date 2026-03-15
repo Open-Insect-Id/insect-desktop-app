@@ -307,7 +307,6 @@ class InsectDetectorApp(ctk.CTk):
             
             images = get_species_image(nub_id)
             logger.debug(f"Media count found: {len(images)}")
-            self.main_view.api_images_container.display_images_async(images)
 
             self.update_status(status)
 
@@ -323,6 +322,8 @@ class InsectDetectorApp(ctk.CTk):
                 logger.warning("Impossible d'enregistrer l'observation: %s", e)
 
             self.display_results(results_data)
+            self.main_view.api_images_container.display_images_async(images)
+
 
         except Exception as e:
             self.clear_results()
