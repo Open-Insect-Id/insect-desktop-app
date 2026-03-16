@@ -238,3 +238,16 @@ class MainView(ctk.CTkFrame):
                 width=30,
             )
             progress_label.grid(row=0, column=1, sticky="e")
+
+
+        # Possible card showing the confidence - not implemented yet
+
+        # card_bg = ("gray80", "gray25") if is_winner else ("gray85", "gray20")
+        #
+        # confidence_frame = ctk.CTkFrame(
+        #     self.result_scores_container,
+        #     fg_color=card_bg,
+        #     corner_radius=10,
+        #     border_width=1 if is_winner else 0,
+        #     border_color=config.THEME.get("primary_color"),
+        # )
