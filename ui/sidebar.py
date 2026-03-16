@@ -73,7 +73,7 @@ class Sidebar(ctk.CTkFrame):
 
         self.btn_view_map = ctk.CTkButton(
             self,
-            text="View map",
+            text="Voir la carte",
             image=self.icons.get("map"),
             compound="left",
             font=ctk.CTkFont(size=14, weight="bold"),
@@ -89,7 +89,7 @@ class Sidebar(ctk.CTkFrame):
         self.btn_gbif = ctk.CTkButton(
             self,
             text="Lien vers GBIF",
-            image=self.icons.get("map"),
+            image=self.icons.get("link"),
             compound="left",
             font=ctk.CTkFont(size=14, weight="bold"),
             height=btn_height,
@@ -118,7 +118,7 @@ class Sidebar(ctk.CTkFrame):
         self.btn_journal = ctk.CTkButton(
             self,
             text=config.MESSAGES.get("button_journal", "Journal d'observation"),
-            image=self.icons.get("info"),
+            image=self.icons.get("diary"),
             compound="left",
             font=ctk.CTkFont(size=14, weight="bold"),
             height=btn_height,
@@ -132,7 +132,7 @@ class Sidebar(ctk.CTkFrame):
         self.btn_export_pdf = ctk.CTkButton(
             self,
             text="Exporter en PDF",
-            image=self.icons.get("info"),
+            image=self.icons.get("pdf"),
             compound="left",
             font=ctk.CTkFont(size=14, weight="bold"),
             height=btn_height,

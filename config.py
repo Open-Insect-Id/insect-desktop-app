@@ -1,6 +1,7 @@
 """
 Configuration de l'application Insect Identifier
 """
+
 import logging
 import os
 from pathlib import Path
@@ -13,7 +14,7 @@ THEME = {
     "background": "#1e1e1e",
     "text": ("gray10", "#DCE4EE"),
     "btn_height": 45,
-    "icon_size": (24, 24)
+    "icon_size": (24, 24),
 }
 
 # Mapping des icônes
@@ -23,28 +24,23 @@ ICON_MAPPING = {
     "clear": "dust.png",
     "mobile": "mobile-phone.png",
     "map": "maps.png",
-    "info": "info.png"
+    "info": "info.png",
+    "diary": "diary.png",
+    "pdf": "pdf.png",
+    "link": "link.png",
+    "settings": "settings.png",
 }
 
 # Dimensions
-WINDOW_SIZE = {
-    "width": 1200,
-    "height": 800
-}
+WINDOW_SIZE = {"width": 1200, "height": 800}
 WINDOW_STATE = "maximized"  # normal, maximized
 # normal suit la taille définie
 # maximized maximise la fenêtre et ignore donc WINDOW_SIZE
 
-IMAGE_SIZE = {
-    "preview_width": 400,
-    "preview_height": 400
-}
+IMAGE_SIZE = {"preview_width": 400, "preview_height": 400}
 
 # Modèle
-MODEL = {
-    "input_size": (224, 224),
-    "default_input_size": (224, 224)
-}
+MODEL = {"input_size": (224, 224), "default_input_size": (224, 224)}
 
 MODELS_DIR = Path("models")
 CLASSIFIER_MODEL_DIR = MODELS_DIR / Path("classifier")
@@ -59,7 +55,7 @@ DEFAULT_PATHS_IMAGES = [
     os.path.expanduser("~/Downloads"),
     os.path.expanduser("~/Pictures"),
     os.path.expanduser("~/Documents"),
-    Path(Path(__file__).parent / Path("images"))
+    Path(Path(__file__).parent / Path("images")),
 ]
 
 # Par défaut, on peut utiliser le dernier dossier de la liste (images dans le projet)
@@ -67,15 +63,10 @@ DEFAULT_PATHS_IMAGES = [
 PATH_IMAGES = DEFAULT_PATHS_IMAGES[-1]
 
 # Résultats
-RESULTS = {
-    "top_k": 5,
-    "confidence_threshold": 0.01
-}
+RESULTS = {"top_k": 5, "confidence_threshold": 0.01}
 
 # Fichiers autorisés
-ALLOWED_EXTENSIONS = [
-    ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp"
-]
+ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp"]
 
 # Messages
 MESSAGES = {
@@ -86,27 +77,26 @@ MESSAGES = {
     "error_load_model": "Impossible de charger le modèle",
     "error_analyze": "Oups bah ça marche pas",
     "success": "✅ RÉSULTATS DE L'ANALYSE",
-
     # messages d'état de la GUI (listes pour aléatoire)
     "model_loaded": [
         "Modèle chargé ✔ \nprêt à détecter des bestioles",
         "Modèle prêt \nque la chasse commence!",
-        "Modèle chargé ✔ \nl'IA est éveillée (café consommé)"
+        "Modèle chargé ✔ \nl'IA est éveillée (café consommé)",
     ],
     "model_missing": [
         "Je ne sais pas du tout comment tu as fait pour avoir cette erreur mais le modèle n'est pas chargé ❌",
         "Modèle absent - il a pris des vacances 🏖️",
-        "Modèle introuvable - il joue à cache-cache 🫣"
+        "Modèle introuvable - il joue à cache-cache 🫣",
     ],
     "image_loaded": [
         "Image chargée - belle prise!",
         "Image reçue 🖼️ - prépare les loupes",
-        "Image chargée - prêts pour l'analyse!"
+        "Image chargée - prêts pour l'analyse!",
     ],
     "analysis_start": [
         "Analyse en cours… L'IA scrute la bestiole 🧐",
         "On analyse... mets-toi à l'aise, ça prend une coffee break ☕",
-        "Analyse en cours - patience, la science travaille"
+        "Analyse en cours - patience, la science travaille",
     ],
     "analysis_done": [
         "Analyse terminée ✔",
@@ -123,9 +113,8 @@ MESSAGES = {
     "ready": [
         "Prêt",
         "Prêt - prêt à chasser des insectes!",
-        "Prêt (en mode veille, mais opérationnel)"
+        "Prêt (en mode veille, mais opérationnel)",
     ],
-
     # textes spécifiques à l'interface
     "app_title": "🦋 Open Insect Identifier",
     "button_upload": "Charger Image",
@@ -134,7 +123,7 @@ MESSAGES = {
     "no_image_selected": "Aucune image sélectionnée",
     "results_title": "RÉSULTATS DE L'ANALYSE",
     "button_journal": "Journal d'observation",
-    "geo_missing": "Aucune donnée géographique pour {name}"
+    "geo_missing": "Aucune donnée géographique pour {name}",
 }
 
 

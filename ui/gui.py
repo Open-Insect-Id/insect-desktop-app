@@ -68,18 +68,45 @@ class InsectDetectorApp(ctk.CTk):
         )
         self.geometry(size_str)
 
-        # Maximiser par défaut (gestion spécifique Linux/Windows)
+        # Maximiser (gestion spécifique Linux/Windows)
         maximized = (
             config.WINDOW_STATE == "maximized"
             if hasattr(config, "WINDOW_STATE")
             else True
         )
-        if maximized:
-            if os.name == "nt":
-                self.after(0, lambda: self.state("zoomed"))
-            else:
-                self.after(0, lambda: self.attributes("-zoomed", True))
+        if os.name == "nt":
+            try:
+                ico_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "ui",
+                    "icons",
+                    "insect_id.ico",
+                )
+                if os.path.exists(ico_path):
+                    self.iconbitmap(ico_path)
+            except Exception as e:
+                logger.warning(f"Impossible de définir l'icône de l'application : {e}")
 
+            if maximized:
+                self.after(0, lambda: self.state("zoomed"))
+        else:
+            # Linux/Mac : utiliser iconphoto avec un PNG
+            try:
+                import tkinter as tk
+                png_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "ui",
+                    "icons",
+                    "insect_id.png",
+                )
+                if os.path.exists(png_path):
+                    img = tk.PhotoImage(file=png_path)
+                    self.iconphoto(True, img)
+            except Exception as e:
+                logger.warning(f"Impossible de définir l'icône PNG de l'application : {e}")
+
+            if maximized:
+                self.after(0, lambda: self.attributes("-zoomed", True))
         self.minsize(800, 500)
 
         # Etat
