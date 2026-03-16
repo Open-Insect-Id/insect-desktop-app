@@ -42,7 +42,7 @@ IMAGE_SIZE = {"preview_width": 400, "preview_height": 400}
 # Modèle
 MODEL = {"input_size": (224, 224), "default_input_size": (224, 224)}
 
-MODELS_DIR = Path("models")
+MODELS_DIR = Path("assets/models")
 CLASSIFIER_MODEL_DIR = MODELS_DIR / Path("classifier")
 OBJ_DETECTOR_MODEL_DIR = MODELS_DIR / Path("obj_detector")
 
@@ -55,7 +55,7 @@ DEFAULT_PATHS_IMAGES = [
     os.path.expanduser("~/Downloads"),
     os.path.expanduser("~/Pictures"),
     os.path.expanduser("~/Documents"),
-    Path(Path(__file__).parent / Path("images")),
+    Path(Path(__file__).parent / Path("assets/images")),
 ]
 
 # Par défaut, on peut utiliser le dernier dossier de la liste (images dans le projet)
@@ -67,65 +67,6 @@ RESULTS = {"top_k": 5, "confidence_threshold": 0.01}
 
 # Fichiers autorisés
 ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp"]
-
-# Messages
-MESSAGES = {
-    "welcome": "Uploadez une image pour identifier l'insecte",
-    "no_image": "Veuillez d'abord uploader une image",
-    "analyzing": "🔄 Analyse en cours...",
-    "error_load_image": "Impossible de charger l'image",
-    "error_load_model": "Impossible de charger le modèle",
-    "error_analyze": "Oups bah ça marche pas",
-    "success": "✅ RÉSULTATS DE L'ANALYSE",
-    # messages d'état de la GUI (listes pour aléatoire)
-    "model_loaded": [
-        "Modèle chargé ✔ \nprêt à détecter des bestioles",
-        "Modèle prêt \nque la chasse commence!",
-        "Modèle chargé ✔ \nl'IA est éveillée (café consommé)",
-    ],
-    "model_missing": [
-        "Je ne sais pas du tout comment tu as fait pour avoir cette erreur mais le modèle n'est pas chargé ❌",
-        "Modèle absent - il a pris des vacances 🏖️",
-        "Modèle introuvable - il joue à cache-cache 🫣",
-    ],
-    "image_loaded": [
-        "Image chargée - belle prise!",
-        "Image reçue 🖼️ - prépare les loupes",
-        "Image chargée - prêts pour l'analyse!",
-    ],
-    "analysis_start": [
-        "Analyse en cours… L'IA scrute la bestiole 🧐",
-        "On analyse... mets-toi à l'aise, ça prend une coffee break ☕",
-        "Analyse en cours - patience, la science travaille",
-    ],
-    "analysis_done": [
-        "Analyse terminée ✔",
-        "C'est dans la boîte! Résultats prêts 📊",
-    ],
-    "analysis_error": [
-        "Oops - l'analyse a trébuché. L'IA va se faire une tasse de thé ☕",
-        "Erreur durant l'analyse - réessaie ou vérifie l'image.",
-    ],
-    "no_model": [
-        "Aucun modèle chargé. Impossible d'analyser (le modèle a fui).",
-        "Pas de bras, pas de chocolat. Ah non, pas de modèle, pas d'analyse!",
-    ],
-    "ready": [
-        "Prêt",
-        "Prêt - prêt à chasser des insectes!",
-        "Prêt (en mode veille, mais opérationnel)",
-    ],
-    # textes spécifiques à l'interface
-    "app_title": "🦋 Open Insect Identifier",
-    "button_upload": "Charger Image",
-    "button_identify": "Identifier",
-    "button_clear": "Effacer",
-    "no_image_selected": "Aucune image sélectionnée",
-    "results_title": "RÉSULTATS DE L'ANALYSE",
-    "button_journal": "Journal d'observation",
-    "geo_missing": "Aucune donnée géographique pour {name}",
-}
-
 
 LOGGING_LEVELS: dict[str, int] = {
     "VERBOSE": 5,

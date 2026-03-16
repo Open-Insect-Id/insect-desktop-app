@@ -8,7 +8,7 @@ from config import *
 from ui.gui import InsectDetectorApp
 from utils.logger import setup_logger
 from utils.observation_db import init_db
-from models.classifier.model import load_model
+from utils.model import load_model
 from utils.auto_crop import load_onnx_detector
 
 logger = setup_logger(__name__)

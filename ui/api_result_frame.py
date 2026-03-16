@@ -8,7 +8,7 @@ import concurrent.futures
 
 
 class ApiResultFrame(ctk.CTkScrollableFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, i18n=None, **kwargs):
         super().__init__(master, **kwargs)
         self.images_refs = []
         self.loading_label = None
@@ -17,6 +17,7 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
         self._cache_lock = threading.Lock()
         self._columns = 3
         self._configure_grid()
+        self.i18n = i18n
 
     def _configure_grid(self):
         for col in range(self._columns):
@@ -30,25 +31,36 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
         self.images_refs.clear()
 
         if not images:
-            ctk.CTkLabel(self, text="Pas d'images trouvées", font=ctk.CTkFont(slant="italic")).grid(row=0, column=0, columnspan=self._columns, padx=20, pady=20)
+            ctk.CTkLabel(
+                self,
+                text=(
+                    self.i18n.t("no_images_found")
+                    if self.i18n
+                    else "Pas d'images trouvées"
+                ),
+                font=ctk.CTkFont(slant="italic"),
+            ).grid(row=0, column=0, columnspan=self._columns, padx=20, pady=20)
             return
 
         # Show loading text + progress bar
-        self.loading_label = ctk.CTkLabel(self, text="Chargement des images… (0/{})".format(len(images)))
-        self.loading_label.grid(row=0, column=0, columnspan=self._columns, padx=20, pady=(20, 5))
+        loading_text = f"{self.i18n.t('loading_images') if self.i18n else 'Chargement des images…'} (0/{len(images)})"
+        self.loading_label = ctk.CTkLabel(self, text=loading_text)
+        self.loading_label.grid(
+            row=0, column=0, columnspan=self._columns, padx=20, pady=(20, 5)
+        )
 
         self.loading_bar = ctk.CTkProgressBar(self, width=250)
         self.loading_bar.set(0)
-        self.loading_bar.grid(row=1, column=0, columnspan=self._columns, padx=20, pady=(0, 20))
+        self.loading_bar.grid(
+            row=1, column=0, columnspan=self._columns, padx=20, pady=(0, 20)
+        )
 
         # Force UI redraw so the loading indicators appear immediately
         self.update_idletasks()
 
         # Start background thread
         thread = threading.Thread(
-            target=self._load_images_worker,
-            args=(images,),
-            daemon=True
+            target=self._load_images_worker, args=(images,), daemon=True
         )
         thread.start()
 
@@ -73,9 +85,9 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
         return pil_image
 
     def _update_loading_label(self, loaded: int, total: int):
-
         try:
-            self.loading_label.configure(text=f"Chargement des images… ({loaded}/{total})")
+            loading_text = f"{self.i18n.t('loading_images') if self.i18n else 'Chargement des images…'} ({loaded}/{total})"
+            self.loading_label.configure(text=loading_text)
             if self.loading_bar:
                 self.loading_bar.set(min(max(loaded / total, 0.0), 1.0))
         except Exception:
@@ -103,7 +115,12 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
                         loaded[idx] = result
                         loaded_count += 1
                         # Update the loading label on the main thread
-                        self.after(0, lambda lc=loaded_count, tot=total: self._update_loading_label(lc, tot))
+                        self.after(
+                            0,
+                            lambda lc=loaded_count, tot=total: self._update_loading_label(
+                                lc, tot
+                            ),
+                        )
 
         # Filter out any None entries (failed downloads)
         ordered_images = [img for img in loaded if img is not None]
@@ -113,13 +130,15 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
 
     def _open_image_popup(self, image: Image.Image):
         popup = ctk.CTkToplevel(self)
-        popup.title("Image agrandie")
+        popup.title(self.i18n.t("image_popup_title") if self.i18n else "Image agrandie")
         popup.geometry("850x850")
 
         display_image = image.copy()
         display_image.thumbnail((800, 800))
 
-        popup_image = ctk.CTkImage(light_image=display_image, dark_image=display_image, size=display_image.size)
+        popup_image = ctk.CTkImage(
+            light_image=display_image, dark_image=display_image, size=display_image.size
+        )
         label = ctk.CTkLabel(popup, image=popup_image, text="")
         label.pack(expand=True, fill="both", padx=10, pady=10)
         popup._popup_image_ref = popup_image
@@ -150,13 +169,17 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
             thumb.thumbnail((150, 150))
 
             ctk_image = ctk.CTkImage(
-                light_image=thumb,
-                dark_image=thumb,
-                size=thumb.size
+                light_image=thumb, dark_image=thumb, size=thumb.size
             )
 
             # Use a frame to better align thumbnails because it's coooool
-            cell = ctk.CTkFrame(self, fg_color=("gray92", "gray18"), corner_radius=10, border_width=1, border_color=("gray70", "gray25"))
+            cell = ctk.CTkFrame(
+                self,
+                fg_color=("gray92", "gray18"),
+                corner_radius=10,
+                border_width=1,
+                border_color=("gray70", "gray25"),
+            )
             row = index // columns
             col = index % columns
             cell.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
@@ -167,7 +190,9 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
             label.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
             # Open larger view on click
-            label.bind("<Button-1>", lambda e, img=full_image: self._open_image_popup(img))
+            label.bind(
+                "<Button-1>", lambda e, img=full_image: self._open_image_popup(img)
+            )
 
             # Keep a reference so the image stays visible
             self.images_refs.append(ctk_image)

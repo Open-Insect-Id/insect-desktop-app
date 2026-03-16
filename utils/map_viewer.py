@@ -1,8 +1,8 @@
 """
 Module pour afficher les cartes géographiques des observations d'insectes.
 """
+
 import tempfile
-import webbrowser
 
 import folium
 from folium.plugins import HeatMap, MiniMap
@@ -32,11 +32,7 @@ def create_insect_map(species_name: str, coordinates: list, output_path: str = N
     avg_lon = sum(coord[1] for coord in coordinates) / len(coordinates)
 
     # Créer la carte centrée sur la moyenne
-    m = folium.Map(
-        location=[avg_lat, avg_lon],
-        zoom_start=6,
-        tiles='OpenStreetMap'
-    )
+    m = folium.Map(location=[avg_lat, avg_lon], zoom_start=6, tiles="OpenStreetMap")
 
     MiniMap(toggle_display=True).add_to(m)
 
@@ -46,10 +42,10 @@ def create_insect_map(species_name: str, coordinates: list, output_path: str = N
             location=[lat, lon],
             radius=5,
             popup=f"{species_name}<br>Lat: {lat:.5f}<br>Lon: {lon:.5f}",
-            color='#3388ff',
+            color="#3388ff",
             fill=True,
-            fillColor='#3388ff',
-            fillOpacity=0.6
+            fillColor="#3388ff",
+            fillOpacity=0.6,
         ).add_to(m)
 
     # Ajouter un truc style map chaleur si beaucoup de points
@@ -59,7 +55,9 @@ def create_insect_map(species_name: str, coordinates: list, output_path: str = N
     # Sauvegarder la carte
     if output_path is None:
         # Créer un fichier temporaire
-        temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8')
+        temp_file = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".html", delete=False, encoding="utf-8"
+        )
         output_path = temp_file.name
         temp_file.close()
 
@@ -82,7 +80,56 @@ def open_map_in_browser(species_name: str, coordinates: list):
     try:
         map_path = create_insect_map(species_name, coordinates)
         if map_path:
-            webbrowser.open('file://' + map_path)
-            logger.info(f"Carte ouverte pour {species_name} ({len(coordinates)} observations)")
+            import webbrowser
+            import os
+            import shutil
+            import threading
+            from flask import Flask, send_from_directory
+            import socket
+
+            # Move map file to current directory for serving
+            dest_name = os.path.basename(map_path)
+            dest_path = os.path.join(os.getcwd(), dest_name)
+            shutil.copy(map_path, dest_path)
+
+            # Find a free port
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.bind(("", 0))
+            port = sock.getsockname()[1]
+            sock.close()
+
+            app = Flask(__name__)
+
+            @app.route(f"/{dest_name}")
+            def serve_map():
+                return send_from_directory(os.getcwd(), dest_name)
+
+            def run_flask():
+                import logging
+                import sys
+                from contextlib import contextmanager
+
+                log = logging.getLogger("werkzeug")
+                log.setLevel(logging.ERROR)
+                app.logger.disabled = True
+
+                @contextmanager
+                def suppress_stdout():
+                    old_stdout = sys.stdout
+                    sys.stdout = open(os.devnull, "w")
+                    try:
+                        yield
+                    finally:
+                        sys.stdout.close()
+                        sys.stdout = old_stdout
+
+                with suppress_stdout():
+                    app.run(port=port, debug=False, use_reloader=False)
+
+            threading.Thread(target=run_flask, daemon=True).start()
+            webbrowser.open(f"http://localhost:{port}/{dest_name}")
+            logger.info(
+                f"Carte ouverte pour {species_name} ({len(coordinates)} observations)"
+            )
     except Exception as e:
         logger.error(f"Erreur lors de l'ouverture de la carte: {e}")

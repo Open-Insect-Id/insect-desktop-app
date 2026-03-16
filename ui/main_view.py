@@ -9,25 +9,33 @@ from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
+
 class MainView(ctk.CTkFrame):
-    def __init__(self, master, icons, **kwargs):
+    def __init__(self, master, icons, i18n=None, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
         self.icons = icons
-        
+        self.i18n = i18n
+
         self.grid_rowconfigure(0, weight=5)
         self.grid_rowconfigure(1, weight=4)
         self.grid_columnconfigure(0, weight=1)
 
         # Zone Image
-        self.image_frame = ctk.CTkFrame(self, fg_color=("gray90", "gray16"), corner_radius=10)
+        self.image_frame = ctk.CTkFrame(
+            self, fg_color=("gray90", "gray16"), corner_radius=10
+        )
         self.image_frame.grid(row=0, column=0, sticky="nsew", pady=(0, 20))
         self.image_frame.pack_propagate(False)
 
         self.lbl_image = ctk.CTkLabel(
             self.image_frame,
-            text=config.MESSAGES.get("no_image_selected", "Aucune image sélectionnée\nCliquez sur 'Charger Image'"),
+            text=(
+                self.i18n.t("no_image_selected")
+                if self.i18n
+                else "Aucune image sélectionnée\nCliquez sur 'Charger Image'"
+            ),
             font=ctk.CTkFont(size=16),
-            text_color="gray50"
+            text_color="gray50",
         )
         self.lbl_image.place(relx=0.5, rely=0.5, anchor="center")
 
@@ -56,9 +64,7 @@ class MainView(ctk.CTkFrame):
     def display_image(self, img, new_size):
         # Create new CTkImage instance
         self.current_image_tk = ctk.CTkImage(
-            light_image=img,
-            dark_image=img,
-            size=new_size
+            light_image=img, dark_image=img, size=new_size
         )
 
         # Assign it to the label
@@ -68,7 +74,11 @@ class MainView(ctk.CTkFrame):
     def clear_image(self):
         self.lbl_image.configure(
             image=None,
-            text=config.MESSAGES.get("no_image_selected", "Aucune image sélectionnée")
+            text=(
+                self.i18n.t("no_image_selected")
+                if self.i18n
+                else "Aucune image sélectionnée"
+            ),
         )
         try:
             self.lbl_image._label.configure(image="")
@@ -94,8 +104,10 @@ class MainView(ctk.CTkFrame):
         self.show_results_area()
         loading_label = ctk.CTkLabel(
             self.result_scores_container,
-            text="⏳ Analyse en cours...",
-            font=ctk.CTkFont(size=16, slant="italic")
+            text=(
+                self.i18n.t("analysis_start") if self.i18n else "⏳ Analyse en cours..."
+            ),
+            font=ctk.CTkFont(size=16, slant="italic"),
         )
         loading_label.grid(row=0, column=0, pady=40)
         return loading_label
@@ -105,12 +117,14 @@ class MainView(ctk.CTkFrame):
         self.show_results_area()
 
         # Titre des résultats
-        title_text = config.MESSAGES.get("results_title", "🔎 RÉSULTATS DE L'ANALYSE")
+        title_text = (
+            self.i18n.t("results_title") if self.i18n else "🔎 RÉSULTATS DE L'ANALYSE"
+        )
         title = ctk.CTkLabel(
             self.result_scores_container,
             text=title_text,
             font=ctk.CTkFont(size=20, weight="bold"),
-            text_color=("gray10", "gray90")
+            text_color=("gray10", "gray90"),
         )
         title.grid(row=0, column=0, columnspan=2, sticky="w", pady=(10, 20), padx=10)
 
@@ -121,7 +135,7 @@ class MainView(ctk.CTkFrame):
         for i, (level, name, conf, map_url) in enumerate(results_data):
             if i >= 4:
                 break
-                
+
             is_winner = i == 0
             card_bg = ("gray80", "gray25") if is_winner else ("gray85", "gray20")
 
@@ -130,7 +144,7 @@ class MainView(ctk.CTkFrame):
                 fg_color=card_bg,
                 corner_radius=10,
                 border_width=1 if is_winner else 0,
-                border_color=config.THEME.get("primary_color")
+                border_color=config.THEME.get("primary_color"),
             )
             row = (i // 2) + 1
             col = i % 2
@@ -150,7 +164,7 @@ class MainView(ctk.CTkFrame):
                 text=name,
                 font=ctk.CTkFont(size=14, weight="bold"),
                 anchor="w",
-                wraplength=120
+                wraplength=120,
             )
             name_label.pack(side="top", anchor="w")
 
@@ -158,7 +172,7 @@ class MainView(ctk.CTkFrame):
                 info_frame,
                 text=level.upper(),
                 font=ctk.CTkFont(size=10, weight="bold"),
-                text_color="gray50"
+                text_color="gray50",
             )
             level_label.pack(side="top", anchor="w")
 
@@ -173,19 +187,28 @@ class MainView(ctk.CTkFrame):
                 height=28,
                 fg_color="#5a5c5c",
                 hover_color="#454747",
-                command=lambda n=name: wikipedia_search.open_web_browser_wikipedia_search(n)
+                command=lambda n=name: wikipedia_search.open_web_browser_wikipedia_search(
+                    n, self.i18n.lang if hasattr(self, "i18n") else "fr"
+                ),
             )
             wiki_btn.grid(row=0, column=0, padx=1)
 
-            progress_container = ctk.CTkFrame(card_frame, fg_color="transparent", height=4)
+            progress_container = ctk.CTkFrame(
+                card_frame, fg_color="transparent", height=4
+            )
             progress_container.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 8))
             progress_container.grid_columnconfigure(0, weight=1)
 
-            if conf > 80: p_color = "#2fa572"
-            elif conf > 50: p_color = "#d68c22"
-            else: p_color = "#cf3838"
+            if conf > 80:
+                p_color = "#2fa572"
+            elif conf > 50:
+                p_color = "#d68c22"
+            else:
+                p_color = "#cf3838"
 
-            progress_bar = ctk.CTkProgressBar(progress_container, height=6, corner_radius=3)
+            progress_bar = ctk.CTkProgressBar(
+                progress_container, height=6, corner_radius=3
+            )
             progress_bar.grid(row=0, column=0, sticky="ew", padx=(0, 5))
             progress_bar.set(conf / 100.0)
             progress_bar.configure(progress_color=p_color)
@@ -195,6 +218,6 @@ class MainView(ctk.CTkFrame):
                 text=f"{conf:.0f}%",
                 font=ctk.CTkFont(size=11, weight="bold"),
                 text_color=p_color,
-                width=30
+                width=30,
             )
             progress_label.grid(row=0, column=1, sticky="e")

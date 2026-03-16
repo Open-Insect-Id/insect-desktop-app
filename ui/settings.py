@@ -4,6 +4,7 @@ import platform
 import webbrowser
 import config
 from utils.logger import setup_logger
+
 logger = setup_logger(__name__)
 
 from PIL import Image
@@ -11,22 +12,34 @@ import customtkinter as ctk
 
 from utils.observation_db import delete_observation, fetch_observations
 
+
 class SettingsWindow(ctk.CTkToplevel):
     """Window displaying the observation history."""
 
-    def __init__(self, parent):
+    def __init__(self, parent, i18n=None):
         super().__init__(parent)
-        self.title("Paramètres")
+        self.i18n = i18n
+        self.title(self.i18n.t("settings") if self.i18n else "Paramètres")
         self.geometry("760x520")
         self.resizable(True, True)
         self._build_ui()
         self.refresh()
 
-    def color_input_window(self,mode):
-        defaults = {"primary_color": "#1f6aa5", "hover_color": "#195985", "background": "#1e1e1e","text": "#DCE4EE"}
-        ids = {"primary_color":0, "hover_color":1, "background":2,"text":3} # Pour settings.txt
+    def color_input_window(self, mode):
+        defaults = {
+            "primary_color": "#1f6aa5",
+            "hover_color": "#195985",
+            "background": "#1e1e1e",
+            "text": "#DCE4EE",
+        }
+        ids = {
+            "primary_color": 0,
+            "hover_color": 1,
+            "background": 2,
+            "text": 3,
+        }  # Pour settings.txt
         dialog = ctk.CTkInputDialog(
-            text="Entrez une couleur en héxadécimal (ou \"default\")", 
+            text='Entrez une couleur en héxadécimal (ou "default")',
             title="Paramètres - Couleur",
         )
         input_color = dialog.get_input()
@@ -38,9 +51,9 @@ class SettingsWindow(ctk.CTkToplevel):
                 for i in range(4):
                     txt.append(settings.readline())
                 settings.close()
-            input_color = defaults[mode] + "\n" 
+            input_color = defaults[mode] + "\n"
             txt[ids[mode]] = input_color
-            with open("./utils/settings.txt","w") as settings:
+            with open("./utils/settings.txt", "w") as settings:
                 settings.write("".join(txt))
             return
         if len(input_color) == 7 and input_color[0] == "#":
@@ -48,11 +61,15 @@ class SettingsWindow(ctk.CTkToplevel):
         elif len(input_color) == 6:
             pass
         else:
-            logger.warning("Entrée invalide; il faut 6 caractères sans compter un eventuel # au début.")
+            logger.warning(
+                "Entrée invalide; il faut 6 caractères sans compter un eventuel # au début."
+            )
         input_color = input_color.lower()
         for i in range(6):
             if input_color[i] not in "0123456789abcdef":
-                logger.warning("Entrée invalide; les caractères doivent tous être des chiffres héxadécimaux.")
+                logger.warning(
+                    "Entrée invalide; les caractères doivent tous être des chiffres héxadécimaux."
+                )
         config.THEME[mode] = "#" + input_color
         self.refresh()
         txt = []
@@ -62,7 +79,7 @@ class SettingsWindow(ctk.CTkToplevel):
             settings.close()
         input_color += "\n"
         txt[ids[mode]] = "#" + input_color
-        with open("./utils/settings.txt","w") as settings:
+        with open("./utils/settings.txt", "w") as settings:
             settings.write("".join(txt))
 
     def _build_ui(self):
@@ -75,7 +92,7 @@ class SettingsWindow(ctk.CTkToplevel):
 
         header = ctk.CTkLabel(
             top_bar,
-            text="Paramètres",
+            text=self.i18n.t("settings") if self.i18n else "Paramètres",
             font=ctk.CTkFont(size=18, weight="bold"),
         )
         header.grid(row=0, column=0, sticky="w")
@@ -85,12 +102,14 @@ class SettingsWindow(ctk.CTkToplevel):
 
         self.btn_close = ctk.CTkButton(
             btn_frame,
-            text="Fermer",
+            text=(
+                self.i18n.t("close") if self.i18n and self.i18n.t("close") else "Fermer"
+            ),
             width=120,
             command=self.destroy,
-            fg_color = config.THEME.get("primary_color"),
-            hover_color = config.THEME.get("hover_color"),
-            text_color = config.THEME.get("text"),
+            fg_color=config.THEME.get("primary_color"),
+            hover_color=config.THEME.get("hover_color"),
+            text_color=config.THEME.get("text"),
         )
         self.btn_close.pack(side="right")
 
@@ -99,20 +118,25 @@ class SettingsWindow(ctk.CTkToplevel):
         self.scroll.grid_rowconfigure(2, weight=1)
 
     def refresh(self):
-        primary_color = config.THEME.get("primary_color","#1f6aa5")
-        hv_color = config.THEME.get("hover_color","#195985")
-        txt_color = config.THEME.get("text","#DCE4EE")
+        primary_color = config.THEME.get("primary_color", "#1f6aa5")
+        hv_color = config.THEME.get("hover_color", "#195985")
+        txt_color = config.THEME.get("text", "#DCE4EE")
 
-        self.btn_close.configure(fg_color=primary_color,hover_color=hv_color,text_color=txt_color)
+        self.btn_close.configure(
+            fg_color=primary_color, hover_color=hv_color, text_color=txt_color
+        )
 
         self.warning = ctk.CTkLabel(
             self.scroll,
-            text="Afin d'appliquer les changements au menu principal, il faut redémarrer Open Insect Identifier!",
+            text=(
+                self.i18n.t("restart_warning")
+                if self.i18n
+                else "Afin d'appliquer les changements au menu principal, il faut redémarrer Open Insect Identifier!"
+            ),
             font=ctk.CTkFont(size=20),
             text_color=txt_color,
         )
         self.warning.grid(row=0, column=0)
-
 
         self.btn_color = ctk.CTkFrame(self.scroll, width=760)
         self.btn_color.grid(row=1, column=0)
@@ -120,14 +144,18 @@ class SettingsWindow(ctk.CTkToplevel):
 
         self.btn_color_text = ctk.CTkLabel(
             self.btn_color,
-            text="Couleur principale des boutons",
+            text=(
+                self.i18n.t("main_button")
+                if self.i18n
+                else "Couleur principale des boutons"
+            ),
             font=ctk.CTkFont(size=20),
             text_color=txt_color,
         )
         self.btn_color_text.grid(row=0, column=0)
         self.btn_color_changer = ctk.CTkButton(
             self.btn_color,
-            text="Changer",
+            text=self.i18n.t("change") if self.i18n else "Changer",
             font=ctk.CTkFont(size=12),
             command=lambda: self.color_input_window("primary_color"),
             width=120,
@@ -137,21 +165,24 @@ class SettingsWindow(ctk.CTkToplevel):
         )
         self.btn_color_changer.grid(row=0, column=1, padx=50)
 
-
         self.btn_hover = ctk.CTkFrame(self.scroll, width=760)
         self.btn_hover.grid(row=2, column=0)
         self.btn_hover.grid_columnconfigure(1)
-        
+
         self.btn_hover_text = ctk.CTkLabel(
             self.btn_hover,
-            text="Couleur de sélection des boutons",
+            text=(
+                self.i18n.t("hover_button")
+                if self.i18n
+                else "Couleur de sélection des boutons"
+            ),
             font=ctk.CTkFont(size=20),
             text_color=txt_color,
         )
         self.btn_hover_text.grid(row=0, column=0)
         self.btn_hover_changer = ctk.CTkButton(
             self.btn_hover,
-            text="Changer",
+            text=self.i18n.t("change") if self.i18n else "Changer",
             font=ctk.CTkFont(size=12),
             command=lambda: self.color_input_window("hover_color"),
             width=120,
@@ -161,21 +192,20 @@ class SettingsWindow(ctk.CTkToplevel):
         )
         self.btn_hover_changer.grid(row=0, column=1, padx=50)
 
-
         self.bg = ctk.CTkFrame(self.scroll, width=760)
         self.bg.grid(row=3, column=0)
         self.bg.grid_columnconfigure(1)
-        
+
         self.bg_text = ctk.CTkLabel(
             self.bg,
-            text="Couleur de font",
+            text=self.i18n.t("background") if self.i18n else "Couleur de font",
             font=ctk.CTkFont(size=20),
             text_color=txt_color,
         )
         self.bg_text.grid(row=0, column=0)
         self.bg_changer = ctk.CTkButton(
             self.bg,
-            text="Changer",
+            text=self.i18n.t("change") if self.i18n else "Changer",
             font=ctk.CTkFont(size=12),
             command=lambda: self.color_input_window("background"),
             width=120,
@@ -185,21 +215,20 @@ class SettingsWindow(ctk.CTkToplevel):
         )
         self.bg_changer.grid(row=0, column=1, padx=50)
 
-
         self.text_col = ctk.CTkFrame(self.scroll, width=760)
         self.text_col.grid(row=4, column=0)
         self.text_col.grid_columnconfigure(1)
-        
+
         self.text_col_text = ctk.CTkLabel(
             self.text_col,
-            text="Couleur du texte",
+            text=self.i18n.t("text_color") if self.i18n else "Couleur du texte",
             font=ctk.CTkFont(size=20),
             text_color=txt_color,
         )
         self.text_col_text.grid(row=0, column=0)
         self.text_col_changer = ctk.CTkButton(
             self.text_col,
-            text="Changer",
+            text=self.i18n.t("change") if self.i18n else "Changer",
             font=ctk.CTkFont(size=12),
             command=lambda: self.color_input_window("text"),
             width=120,
