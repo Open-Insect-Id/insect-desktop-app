@@ -6,6 +6,7 @@ import config
 from utils import wikipedia_search
 from ui.api_result_frame import ApiResultFrame
 from utils.logger import setup_logger
+from utils.settings_db import get_theme
 
 logger = setup_logger(__name__)
 
@@ -15,6 +16,8 @@ class MainView(ctk.CTkFrame):
         super().__init__(master, fg_color="transparent", **kwargs)
         self.icons = icons
         self.i18n = i18n
+
+        self.theme = get_theme()
 
         self.grid_rowconfigure(0, weight=5)
         self.grid_rowconfigure(1, weight=4)
@@ -26,6 +29,10 @@ class MainView(ctk.CTkFrame):
         )
         self.image_frame.grid(row=0, column=0, sticky="nsew", pady=(0, 20))
         self.image_frame.pack_propagate(False)
+
+        # Set the background color to the widget background from settings
+        self.image_frame.configure(fg_color=self.theme.widget_background)
+
 
         self.lbl_image = ctk.CTkLabel(
             self.image_frame,
@@ -41,6 +48,8 @@ class MainView(ctk.CTkFrame):
 
         # Bottom area (results left, images right)
         self.result_frame = ctk.CTkFrame(self)
+        # Set the background color to the widget background from settings
+        self.theme.apply_bg_to(self.result_frame)
 
         # Make 2 equal columns
         self.result_frame.grid_columnconfigure(0, weight=1)
@@ -48,12 +57,20 @@ class MainView(ctk.CTkFrame):
         self.result_frame.grid_rowconfigure(0, weight=1)
 
         # LEFT — probabilities
-        self.result_scores_container = ctk.CTkScrollableFrame(self.result_frame)
+        self.result_scores_container = ctk.CTkFrame(self.result_frame)
         self.result_scores_container.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+
+        # Set the background color to the widget background from settings
+        self.theme.apply_widget_bg_to(self.result_scores_container)
+
+
 
         # RIGHT — API images grid
         self.api_images_container = ApiResultFrame(self.result_frame)
         self.api_images_container.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
+
+        # Set the background color to the widget background from settings
+        self.theme.apply_widget_bg_to(self.api_images_container)
 
     def show_results_area(self):
         self.result_frame.grid(row=1, column=0, sticky="nsew")

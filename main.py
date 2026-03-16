@@ -7,9 +7,10 @@ import json
 from config import *
 from ui.gui import InsectDetectorApp
 from utils.logger import setup_logger
-from utils.observation_db import init_db
+from utils.observation_db import init_observation_db
 from utils.model import load_model
 from utils.auto_crop import load_onnx_detector
+from utils.settings_db import get_theme
 
 logger = setup_logger(__name__)
 
@@ -83,16 +84,26 @@ def main():
 
     # Initialiser la base de données d'observations
     try:
-        init_db()
+        init_observation_db()
     except Exception as e:
         logger.warning(f"Impossible d'initialiser la base d'observations: {e}")
 
+
     # Initialiser les valeurs de configuration qui peuvent être changées dans les paramètres
-    with open("utils/settings.txt") as settings:
-        THEME["primary_color"] = settings.readline()[0:7]
-        THEME["hover_color"] = settings.readline()[0:7]
-        THEME["background"] = settings.readline()[0:7]
-        THEME["text"] = settings.readline()[0:7]
+    theme = get_theme()
+
+    logger.info(theme)
+    logger.info(theme.background  + "; type: " + str(type(theme.background)))
+
+    # THEME["primary_color"] = theme["primary_color"]
+    # THEME["hover_color"] = theme["hover_color"]
+    # THEME["background"] = theme["background"]
+    # THEME["text"] = theme["text"]
+
+    logger.info(
+        "Initialized colors: primary=%s | hover=%s | background=%s | widgets_background=%s | text=%s",
+        theme.primary_color, theme.hover_color, theme.background, theme.widget_background, theme.text,
+    )
 
     # Lancer l'interface en injectant la session et les métadonnées
     app = InsectDetectorApp(
@@ -102,6 +113,7 @@ def main():
         input_size,
         species_list,
         detector_session,
+        theme,
         hierarchy,
     )
     app.mainloop()

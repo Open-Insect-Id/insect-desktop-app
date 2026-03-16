@@ -13,7 +13,7 @@ def load_image_for_analysis(self, image_path, source_label):
     self.image_path = image_path
     self.display_image(image_path)
 
-    crop_choice = show_box_popup(self, img_boxes, getattr(self, "i18n", None))
+    crop_choice = show_box_popup(self, img_boxes, self.theme, getattr(self, "i18n", None))
     if crop_choice:
         try:
             cropped_path = crop_largest_box(

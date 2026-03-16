@@ -1,23 +1,36 @@
 """
-Configuration de l'application Insect Identifier
+Insect Identifier app configuration
 """
 
 import logging
 import os
 from pathlib import Path
 
-# Apparence
+
+# The default colors for the interface
+DEFAULTS_COLORS = {
+    "primary_color": "#1f6aa5",
+    "hover_color":   "#195985",
+    "background":    "#000000",
+    "widget_background": "#1e1e1e",
+    "text":          "#DCE4EE",
+}
+
+# Appearance (for KT)
 THEME = {
     "mode": "dark",
-    "primary_color": "#1f6aa5",
-    "hover_color": "#195985",
-    "background": "#1e1e1e",
-    "text": ("gray10", "#DCE4EE"),
+    "primary_color": DEFAULTS_COLORS["primary_color"],
+    "hover_color": DEFAULTS_COLORS["hover_color"],
+    "background": DEFAULTS_COLORS["background"],
+    "widget_background": DEFAULTS_COLORS["widget_background"],
+    "text": DEFAULTS_COLORS["text"],
     "btn_height": 45,
     "icon_size": (24, 24),
 }
 
-# Mapping des icônes
+
+
+# Icons mapping
 ICON_MAPPING = {
     "upload": "upload.png",
     "search": "search.png",
@@ -85,5 +98,6 @@ LOGS_DIR = Path("logs")
 
 # Base database used to store user analysis history (journal d'observation)
 OBSERVATION_DB_PATH = Path("observations.db")
+SETTINGS_DB_PATH = Path("settings.db")
 
 LOGS_CONSOLE_GLOBALLY = True

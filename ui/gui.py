@@ -6,6 +6,7 @@ import customtkinter as ctk
 from PIL import Image
 
 import config
+from ui.Theme import Theme
 from utils.logger import setup_logger
 from mobile_server.server import IMAGE_QUEUE
 
@@ -28,6 +29,7 @@ class InsectDetectorApp(ctk.CTk):
         input_size,
         insect_species,
         detector_session,
+        theme: Theme,
         hierarchy=None,
         lang="fr",
     ):
@@ -44,6 +46,10 @@ class InsectDetectorApp(ctk.CTk):
         self.computed_insect_name = None
         self.species_id = None
         self.species_info = None
+        self.theme = theme
+
+        logger.info(theme)
+        logger.info(theme.background + "; type: " + str(type(theme.background)))
 
         # --- I18N ---
         from ui.i18n import I18N
@@ -58,6 +64,9 @@ class InsectDetectorApp(ctk.CTk):
             else "1200x800"
         )
         self.geometry(size_str)
+
+        # Set the background color to the main window
+        self.configure(fg_color=self.theme.background)
 
         from ui.icon_utils import set_app_icon
 
@@ -118,6 +127,8 @@ class InsectDetectorApp(ctk.CTk):
     def create_widgets(self):
         # ==================== SIDEBAR ====================
         self.sidebar = Sidebar(self, self.icons, i18n=self.i18n)
+        self.theme.apply_widget_bg_to(self.sidebar)
+
         self.sidebar.grid(row=0, column=0, sticky="nsew")
 
         # ==================== MAIN VIEW ====================

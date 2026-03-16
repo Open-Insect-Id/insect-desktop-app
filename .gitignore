@@ -59,3 +59,6 @@ Thumbs.db
 
 /mobile_server/uploads
 observations.db
+
+# Settings database, it is created on first run
+utils/settings.db

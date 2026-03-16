@@ -17,7 +17,7 @@ def get_db_path() -> Path:
     return Path("observations.db")
 
 
-def init_db() -> None:
+def init_observation_db() -> None:
     """Create the observation database and tables if they do not exist."""
     db_path = get_db_path()
     db_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,8 +1,11 @@
 import customtkinter as ctk
 from PIL import Image
 
+from config import THEME
+from ui.Theme import Theme
 
-def show_box_popup(parent, img_boxes, i18n=None):
+
+def show_box_popup(parent, img_boxes, theme: Theme, i18n=None):
     """
     Affiche une popup avec l'image annotée (box) et propose le choix de recadrer ou non.
     parent : fenêtre principale (CTk)
@@ -14,6 +17,8 @@ def show_box_popup(parent, img_boxes, i18n=None):
     popup.title(i18n.t("crop_image") if i18n else "Recadrer l'image ?")
     popup.geometry("600x500")
     popup.grab_set()
+    theme.apply_bg_to(popup)
+
 
     ratio = min(550 / img_boxes.width, 400 / img_boxes.height)
     new_size = (int(img_boxes.width * ratio), int(img_boxes.height * ratio))
@@ -37,6 +42,7 @@ def show_box_popup(parent, img_boxes, i18n=None):
         popup.destroy()
 
     btn_frame = ctk.CTkFrame(popup)
+    theme.apply_bg_to(btn_frame)
     btn_frame.pack(pady=10)
     crop_btn = ctk.CTkButton(
         btn_frame,
