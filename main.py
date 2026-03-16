@@ -8,7 +8,8 @@ from config import *
 from ui.gui import InsectDetectorApp
 from utils.logger import setup_logger
 from utils.observation_db import init_db
-from model.model import load_model
+from models.classifier.model import load_model
+from utils.auto_crop import load_onnx_detector
 
 logger = setup_logger(__name__)
 
@@ -19,7 +20,7 @@ def load_hierarchy(path: Path):
     """
     if path.exists():
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
             # Correction: rechercher la clé "hierarchy_map" si présente
@@ -39,13 +40,16 @@ def load_hierarchy(path: Path):
                     display_name = key.replace("_", " ").title()
                 formatted_names.append(display_name)
 
-            logger.debug(f"Hierarchie chargée: {len(formatted_names)} espèces trouvées.")
+            logger.debug(
+                f"Hierarchie chargée: {len(formatted_names)} espèces trouvées."
+            )
             return formatted_names, hierarchy
 
         except Exception as e:
             logger.error(f"Erreur lors de la lecture de la hiérarchie: {e}")
 
     logger.warning(f"Fichier de hiérarchie non trouvé: {path}")
+
 
 def main():
     """
@@ -56,12 +60,19 @@ def main():
     model_path = base / MODEL_PATH
     hierarchy_path = base / HIERARCHY_PATH
     labels_path = base / LABELS_PATH
+    obj_detector_path = base / OBJ_DETECTOR_MODEL_PATH
 
     # Charger le modèle synchroniquement au démarrage (souhait de l'utilisateur)
     try:
-        logger.info("Chargement du modèle ONNX (cela peut prendre quelques secondes)...")
-        session, input_name, output_name, input_size = load_model(model_path, hierarchy_path, labels_path)
+        logger.info(
+            "Chargement des modèles ONNX (cela peut prendre quelques secondes)..."
+        )
+        session, input_name, output_name, input_size = load_model(
+            model_path, hierarchy_path, labels_path
+        )
         logger.debug(f"Modèle chargé: input_size={input_size}")
+        detector_session = load_onnx_detector(obj_detector_path)
+        logger.info("Modèles chargés avec succès.")
     except Exception as e:
         logger.warning(f"Attention: échec du chargement du modèle: {e}")
         session = None
@@ -84,7 +95,15 @@ def main():
         THEME["text"] = settings.readline()[0:7]
 
     # Lancer l'interface en injectant la session et les métadonnées
-    app = InsectDetectorApp(session, input_name, output_name, input_size, species_list, hierarchy)
+    app = InsectDetectorApp(
+        session,
+        input_name,
+        output_name,
+        input_size,
+        species_list,
+        detector_session,
+        hierarchy,
+    )
     app.mainloop()
 
 

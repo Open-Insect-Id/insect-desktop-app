@@ -9,8 +9,12 @@ from utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 
-def summarize_wikipedia_page(text) -> str:
-    wikipedia.set_lang("fr")
+def summarize_wikipedia_page(text, lang) -> str:
+    if lang in wikipedia.languages():   
+        wikipedia.set_lang(lang)
+    else:
+        logger.warning(f"Langue '{lang}' non supportée par Wikipedia, utilisation de l'anglais par défaut.")
+        wikipedia.set_lang("en")
     try:
         summary = wikipedia.summary(text, sentences = 10)
     except wikipedia.DisambiguationError as error:
@@ -21,9 +25,12 @@ def summarize_wikipedia_page(text) -> str:
 
     return summary
 
-def open_web_browser_wikipedia_search(text):
-    lang = "fr"
-    wikipedia.set_lang("fr")
+def open_web_browser_wikipedia_search(text, lang):
+    if lang in wikipedia.languages():
+        wikipedia.set_lang(lang)
+    else:
+        logger.warning(f"Langue '{lang}' non supportée par Wikipedia, utilisation de l'anglais par défaut.")
+        wikipedia.set_lang("en")
     search = wikipedia.search(text, results = 1, suggestion=False)
     if not search:
         lang="en"

@@ -31,6 +31,9 @@ WINDOW_SIZE = {
     "width": 1200,
     "height": 800
 }
+WINDOW_STATE = "maximized"  # normal, maximized
+# normal suit la taille définie
+# maximized maximise la fenêtre et ignore donc WINDOW_SIZE
 
 IMAGE_SIZE = {
     "preview_width": 400,
@@ -43,10 +46,14 @@ MODEL = {
     "default_input_size": (224, 224)
 }
 
-MODEL_DIR = Path("model")
-HIERARCHY_PATH = MODEL_DIR / Path("hierarchy_map.json")
-LABELS_PATH = MODEL_DIR / Path("hierarchy_labels.json")
-MODEL_PATH = MODEL_DIR / Path("insect_model.onnx")
+MODELS_DIR = Path("models")
+CLASSIFIER_MODEL_DIR = MODELS_DIR / Path("classifier")
+OBJ_DETECTOR_MODEL_DIR = MODELS_DIR / Path("obj_detector")
+
+HIERARCHY_PATH = CLASSIFIER_MODEL_DIR / Path("hierarchy_map.json")
+LABELS_PATH = CLASSIFIER_MODEL_DIR / Path("hierarchy_labels.json")
+MODEL_PATH = CLASSIFIER_MODEL_DIR / Path("insect_model.onnx")
+OBJ_DETECTOR_MODEL_PATH = OBJ_DETECTOR_MODEL_DIR / Path("yolov8n.onnx")
 
 DEFAULT_PATHS_IMAGES = [
     os.path.expanduser("~/Downloads"),

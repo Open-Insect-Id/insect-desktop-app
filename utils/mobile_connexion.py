@@ -41,7 +41,9 @@ class MobileConnectionWindow(ctk.CTkToplevel):
 
     def _build_widgets(self):
         """Create the widgets inside the mobile connection window."""
-        self.lbl_qr = ctk.CTkLabel(self, text="Starting server...", font=ctk.CTkFont(size=12))
+        self.lbl_qr = ctk.CTkLabel(
+            self, text="Starting server...", font=ctk.CTkFont(size=12)
+        )
         self.lbl_qr.pack(padx=20, pady=(24, 12))
 
         self.lbl_hint = ctk.CTkLabel(
@@ -88,7 +90,9 @@ class MobileConnectionWindow(ctk.CTkToplevel):
         img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
         img = img.resize((MOBILE_QR_SIZE, MOBILE_QR_SIZE), Image.LANCZOS)
 
-        self.qr_image_tk = ctk.CTkImage(light_image=img, dark_image=img, size=(MOBILE_QR_SIZE, MOBILE_QR_SIZE))
+        self.qr_image_tk = ctk.CTkImage(
+            light_image=img, dark_image=img, size=(MOBILE_QR_SIZE, MOBILE_QR_SIZE)
+        )
         self.lbl_qr.configure(image=self.qr_image_tk, text="")
 
     def refresh_status(self) -> None:
@@ -96,11 +100,15 @@ class MobileConnectionWindow(ctk.CTkToplevel):
         if self.server_runtime:
             info = self.server_runtime.get_connection_info()
             if info.get("connected"):
-                self.lbl_status.configure(text="Mobile Connected", text_color=MOBILE_STATUS_CONNECTED_COLOR)
+                self.lbl_status.configure(
+                    text="Mobile Connected", text_color=MOBILE_STATUS_CONNECTED_COLOR
+                )
                 device = info.get("device_name") or "Unknown device"
                 self.lbl_device.configure(text=f"Device: {device}")
             else:
-                self.lbl_status.configure(text="Mobile idle", text_color=MOBILE_STATUS_IDLE_COLOR)
+                self.lbl_status.configure(
+                    text="Mobile idle", text_color=MOBILE_STATUS_IDLE_COLOR
+                )
                 self.lbl_device.configure(text="No device connected")
         self.after(MOBILE_POLL_INTERVAL_MS, self.refresh_status)
 

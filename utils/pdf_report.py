@@ -22,18 +22,19 @@ from reportlab.platypus import (
 from reportlab.platypus.flowables import Flowable
 
 # ── Palette ───────────────────────────────────────────────────────────────────
-GREEN_DARK  = colors.HexColor("#1B4332")
-GREEN_MID   = colors.HexColor("#2D6A4F")
+GREEN_DARK = colors.HexColor("#1B4332")
+GREEN_MID = colors.HexColor("#2D6A4F")
 GREEN_LIGHT = colors.HexColor("#52B788")
-GREEN_PALE  = colors.HexColor("#D8F3DC")
-AMBER       = colors.HexColor("#E9C46A")
-GREY_DARK   = colors.HexColor("#343A40")
-GREY_MID    = colors.HexColor("#6C757D")
-GREY_LIGHT  = colors.HexColor("#F8F9FA")
-WHITE       = colors.white
+GREEN_PALE = colors.HexColor("#D8F3DC")
+AMBER = colors.HexColor("#E9C46A")
+GREY_DARK = colors.HexColor("#343A40")
+GREY_MID = colors.HexColor("#6C757D")
+GREY_LIGHT = colors.HexColor("#F8F9FA")
+WHITE = colors.white
 
 
 # ── Custom flowables ──────────────────────────────────────────────────────────
+
 
 class ColorRect(Flowable):
     """Solid-color rounded rectangle (decorative band)."""
@@ -47,7 +48,9 @@ class ColorRect(Flowable):
 
     def draw(self):
         self.canv.setFillColor(self.fill_color)
-        self.canv.roundRect(0, 0, self.width, self.height, self.radius, fill=1, stroke=0)
+        self.canv.roundRect(
+            0, 0, self.width, self.height, self.radius, fill=1, stroke=0
+        )
 
 
 class ConfBar(Flowable):
@@ -61,15 +64,20 @@ class ConfBar(Flowable):
 
     def draw(self):
         self.canv.setFillColor(colors.HexColor("#DEE2E6"))
-        self.canv.roundRect(0, 0, self.width, self.height, self.height / 2, fill=1, stroke=0)
+        self.canv.roundRect(
+            0, 0, self.width, self.height, self.height / 2, fill=1, stroke=0
+        )
         fill_w = self.width * self.pct / 100
         if fill_w > 0:
             c = GREEN_LIGHT if self.pct >= 60 else AMBER
             self.canv.setFillColor(c)
-            self.canv.roundRect(0, 0, fill_w, self.height, self.height / 2, fill=1, stroke=0)
+            self.canv.roundRect(
+                0, 0, fill_w, self.height, self.height / 2, fill=1, stroke=0
+            )
 
 
 # ── Header / footer on every page ─────────────────────────────────────────────
+
 
 class _MyDocTemplate(BaseDocTemplate):
 
@@ -86,8 +94,9 @@ class _MyDocTemplate(BaseDocTemplate):
         cv.drawString(1.4 * cm, h - 1.2 * cm, "Open Insect Identifier")
         cv.setFont("Helvetica", 9)
         cv.setFillColor(GREEN_PALE)
-        cv.drawRightString(w - 1.4 * cm, h - 1.2 * cm,
-                           datetime.now().strftime("%d/%m/%Y  %H:%M"))
+        cv.drawRightString(
+            w - 1.4 * cm, h - 1.2 * cm, datetime.now().strftime("%d/%m/%Y  %H:%M")
+        )
 
         # Bottom footer
         cv.setFillColor(GREY_LIGHT)
@@ -102,73 +111,114 @@ class _MyDocTemplate(BaseDocTemplate):
 
 # ── Styles ────────────────────────────────────────────────────────────────────
 
+
 def _build_styles():
     base = getSampleStyleSheet()
     return {
         "hero_title": ParagraphStyle(
-            "hero_title", parent=base["Normal"],
-            fontName="Helvetica-Bold", fontSize=20,
-            textColor=WHITE, alignment=TA_CENTER, spaceAfter=2,
+            "hero_title",
+            parent=base["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=20,
+            textColor=WHITE,
+            alignment=TA_CENTER,
+            spaceAfter=2,
         ),
         "hero_sub": ParagraphStyle(
-            "hero_sub", parent=base["Normal"],
-            fontName="Helvetica", fontSize=9,
-            textColor=GREEN_PALE, alignment=TA_CENTER,
+            "hero_sub",
+            parent=base["Normal"],
+            fontName="Helvetica",
+            fontSize=9,
+            textColor=GREEN_PALE,
+            alignment=TA_CENTER,
         ),
         "section": ParagraphStyle(
-            "section", parent=base["Normal"],
-            fontName="Helvetica-Bold", fontSize=11,
-            textColor=GREEN_DARK, spaceBefore=6, spaceAfter=4,
+            "section",
+            parent=base["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=11,
+            textColor=GREEN_DARK,
+            spaceBefore=6,
+            spaceAfter=4,
         ),
         "body": ParagraphStyle(
-            "body", parent=base["Normal"],
-            fontName="Helvetica", fontSize=9,
-            textColor=GREY_DARK, leading=13, spaceAfter=3,
+            "body",
+            parent=base["Normal"],
+            fontName="Helvetica",
+            fontSize=9,
+            textColor=GREY_DARK,
+            leading=13,
+            spaceAfter=3,
         ),
         "body_small": ParagraphStyle(
-            "body_small", parent=base["Normal"],
-            fontName="Helvetica", fontSize=8,
-            textColor=GREY_MID, leading=11,
+            "body_small",
+            parent=base["Normal"],
+            fontName="Helvetica",
+            fontSize=8,
+            textColor=GREY_MID,
+            leading=11,
         ),
         "table_header": ParagraphStyle(
-            "table_header", parent=base["Normal"],
-            fontName="Helvetica-Bold", fontSize=9,
-            textColor=WHITE, alignment=TA_CENTER,
+            "table_header",
+            parent=base["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=9,
+            textColor=WHITE,
+            alignment=TA_CENTER,
         ),
         "table_cell": ParagraphStyle(
-            "table_cell", parent=base["Normal"],
-            fontName="Helvetica", fontSize=8,
-            textColor=GREY_DARK, leading=11,
+            "table_cell",
+            parent=base["Normal"],
+            fontName="Helvetica",
+            fontSize=8,
+            textColor=GREY_DARK,
+            leading=11,
         ),
         "badge_ok": ParagraphStyle(
-            "badge_ok", parent=base["Normal"],
-            fontName="Helvetica-Bold", fontSize=9,
-            textColor=WHITE, alignment=TA_CENTER,
+            "badge_ok",
+            parent=base["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=9,
+            textColor=WHITE,
+            alignment=TA_CENTER,
         ),
         "badge_warn": ParagraphStyle(
-            "badge_warn", parent=base["Normal"],
-            fontName="Helvetica-Bold", fontSize=9,
-            textColor=GREY_DARK, alignment=TA_CENTER,
+            "badge_warn",
+            parent=base["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=9,
+            textColor=GREY_DARK,
+            alignment=TA_CENTER,
         ),
         "link": ParagraphStyle(
-            "link", parent=base["Normal"],
-            fontName="Helvetica-Oblique", fontSize=8,
+            "link",
+            parent=base["Normal"],
+            fontName="Helvetica-Oblique",
+            fontSize=8,
             textColor=GREEN_MID,
         ),
         "wiki_body": ParagraphStyle(
-            "wiki_body", parent=base["Normal"],
-            fontName="Helvetica", fontSize=8.5,
-            textColor=GREY_DARK, leading=12,
+            "wiki_body",
+            parent=base["Normal"],
+            fontName="Helvetica",
+            fontSize=8.5,
+            textColor=GREY_DARK,
+            leading=12,
         ),
         "wiki_heading": ParagraphStyle(
-            "wiki_heading", parent=base["Normal"],
-            fontName="Helvetica-Bold", fontSize=9.5,
-            textColor=GREEN_MID, spaceBefore=8, spaceAfter=2,
+            "wiki_heading",
+            parent=base["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=9.5,
+            textColor=GREEN_MID,
+            spaceBefore=8,
+            spaceAfter=2,
         ),
     }
 
 
 # ── Wikipedia parser ──────────────────────────────────────────────────────────
+
 
 def _parse_wikipedia(text: str, styles: dict):
     """Split a Wikipedia summary on == Section == markers into styled flowables."""
@@ -177,7 +227,7 @@ def _parse_wikipedia(text: str, styles: dict):
 
     flowables = []
     # Split on == Title == patterns (keep the delimiters as group)
-    parts = re.split(r'==\s*(.+?)\s*==', text)
+    parts = re.split(r"==\s*(.+?)\s*==", text)
     # parts[0] = intro text, then alternating: heading, body, heading, body...
     for i, part in enumerate(parts):
         part = part.strip()
@@ -194,6 +244,7 @@ def _parse_wikipedia(text: str, styles: dict):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
+
 def create_pdf_report(
     output_path: str,
     image_path: str | None,
@@ -206,13 +257,16 @@ def create_pdf_report(
 ) -> str:
     """Generate a single-page polished PDF report."""
 
-    os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
+    os.makedirs(
+        os.path.dirname(output_path) if os.path.dirname(output_path) else ".",
+        exist_ok=True,
+    )
 
     page_w, page_h = A4
-    margin_lr  = 1.4 * cm
-    margin_top = 2.0 * cm   # below header band
-    margin_bot = 1.2 * cm   # above footer band
-    content_w  = page_w - 2 * margin_lr
+    margin_lr = 1.4 * cm
+    margin_top = 2.0 * cm  # below header band
+    margin_bot = 1.2 * cm  # above footer band
+    content_w = page_w - 2 * margin_lr
 
     doc = _MyDocTemplate(
         output_path,
@@ -223,14 +277,16 @@ def create_pdf_report(
         bottomMargin=margin_bot,
     )
     frame = Frame(
-        margin_lr, margin_bot,
-        content_w, page_h - margin_top - margin_bot,
+        margin_lr,
+        margin_bot,
+        content_w,
+        page_h - margin_top - margin_bot,
         id="main",
     )
     doc.addPageTemplates([PageTemplate(id="main", frames=[frame])])
 
     styles = _build_styles()
-    story  = []
+    story = []
 
     # ── Hero banner ───────────────────────────────────────────────────────────
     hero_content = [
@@ -239,21 +295,25 @@ def create_pdf_report(
         Paragraph("Rapport d'identification entomologique", styles["hero_sub"]),
     ]
     hero_table = Table([[hero_content]], colWidths=[content_w])
-    hero_table.setStyle(TableStyle([
-        ("BACKGROUND",   (0, 0), (-1, -1), GREEN_MID),
-        ("ROUNDEDCORNERS", [6]),
-        ("TOPPADDING",   (0, 0), (-1, -1), 14),
-        ("BOTTOMPADDING",(0, 0), (-1, -1), 14),
-        ("LEFTPADDING",  (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("VALIGN",       (0, 0), (-1, -1), "MIDDLE"),
-    ]))
+    hero_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), GREEN_MID),
+                ("ROUNDEDCORNERS", [6]),
+                ("TOPPADDING", (0, 0), (-1, -1), 14),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 14),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ]
+        )
+    )
     story.append(hero_table)
 
     story.append(Spacer(1, 0.3 * cm))
 
     # ── Row 1 : image | infos clés (2 colonnes) ──────────────────────────────
-    col_w_img  = 6 * cm
+    col_w_img = 6 * cm
     col_w_info = content_w - col_w_img
 
     # --- Column A : image
@@ -275,13 +335,17 @@ def create_pdf_report(
         bs = styles["badge_ok"] if reliable else styles["badge_warn"]
         label = f"{'Fiable' if reliable else 'Incertain'}  —  {avg_conf:.1f} %"
         bt = Table([[Paragraph(label, bs)]], colWidths=[6 * cm])
-        bt.setStyle(TableStyle([
-            ("BACKGROUND",   (0, 0), (-1, -1), badge_color),
-            ("TOPPADDING",   (0, 0), (-1, -1), 5),
-            ("BOTTOMPADDING",(0, 0), (-1, -1), 5),
-            ("LEFTPADDING",  (0, 0), (-1, -1), 8),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-        ]))
+        bt.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), badge_color),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ]
+            )
+        )
         col_info.append(bt)
         col_info.append(Spacer(1, 5))
         col_info.append(ConfBar(avg_conf, width=6 * cm, height=9))
@@ -290,88 +354,117 @@ def create_pdf_report(
     if species_name:
         col_info.append(Paragraph(f"<b>Espèce :</b>  {species_name}", styles["body"]))
     if gbif_url:
-        col_info.append(Paragraph(
-            f"<b>GBIF :</b>  <a href='{gbif_url}' color='#2D6A4F'>{gbif_url}</a>",
-            styles["link"],
-        ))
+        col_info.append(
+            Paragraph(
+                f"<b>GBIF :</b>  <a href='{gbif_url}' color='#2D6A4F'>{gbif_url}</a>",
+                styles["link"],
+            )
+        )
 
     row1 = Table(
         [[col_img, col_info]],
         colWidths=[col_w_img, col_w_info],
         hAlign="LEFT",
     )
-    row1.setStyle(TableStyle([
-        ("VALIGN",       (0, 0), (-1, -1), "TOP"),
-        ("LEFTPADDING",  (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING", (0, 0), (0, -1), 14),
-        ("TOPPADDING",   (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING",(0, 0), (-1, -1), 0),
-    ]))
+    row1.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (0, -1), 14),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ]
+        )
+    )
     story.append(row1)
     story.append(Spacer(1, 0.3 * cm))
 
     # ── Wikipedia : pleine largeur ────────────────────────────────────────────
     if wikipedia_summary:
-        story.append(HRFlowable(width="100%", thickness=0.8, color=GREEN_PALE, spaceAfter=4))
+        story.append(
+            HRFlowable(width="100%", thickness=0.8, color=GREEN_PALE, spaceAfter=4)
+        )
         story.append(Paragraph("Résumé Wikipedia", styles["section"]))
         wiki_flowables = _parse_wikipedia(wikipedia_summary, styles)
         # Wrap all flowables in a single styled container table
         wiki_inner = Table([[wiki_flowables]], colWidths=[content_w - 0.4 * cm])
-        wiki_inner.setStyle(TableStyle([
-            ("BACKGROUND",   (0, 0), (-1, -1), GREY_LIGHT),
-            ("LEFTPADDING",  (0, 0), (-1, -1), 12),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-            ("TOPPADDING",   (0, 0), (-1, -1), 10),
-            ("BOTTOMPADDING",(0, 0), (-1, -1), 10),
-            ("LINEBEFORE",   (0, 0), (0, -1), 3, GREEN_LIGHT),
-        ]))
+        wiki_inner.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), GREY_LIGHT),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                    ("TOPPADDING", (0, 0), (-1, -1), 10),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+                    ("LINEBEFORE", (0, 0), (0, -1), 3, GREEN_LIGHT),
+                ]
+            )
+        )
         story.append(wiki_inner)
         story.append(Spacer(1, 0.3 * cm))
 
     # ── Species table ─────────────────────────────────────────────────────────
     if results_data:
-        story.append(HRFlowable(width="100%", thickness=0.8, color=GREEN_PALE, spaceAfter=4))
+        story.append(
+            HRFlowable(width="100%", thickness=0.8, color=GREEN_PALE, spaceAfter=4)
+        )
         story.append(Paragraph("Espèces ressemblantes", styles["section"]))
 
         header = [
-            Paragraph("Niveau",           styles["table_header"]),
+            Paragraph("Niveau", styles["table_header"]),
             Paragraph("Nom scientifique", styles["table_header"]),
-            Paragraph("Confiance",        styles["table_header"]),
-            Paragraph("Barre",            styles["table_header"]),
+            Paragraph("Confiance", styles["table_header"]),
+            Paragraph("Barre", styles["table_header"]),
         ]
         rows = [header]
         for level, name, conf, _ in results_data:
-            rows.append([
-                Paragraph(level, styles["table_cell"]),
-                Paragraph(name,  styles["table_cell"]),
-                Paragraph(f"{conf:.0f} %", styles["table_cell"]),
-                ConfBar(conf, width=3.8 * cm, height=8),
-            ])
+            rows.append(
+                [
+                    Paragraph(level, styles["table_cell"]),
+                    Paragraph(name, styles["table_cell"]),
+                    Paragraph(f"{conf:.0f} %", styles["table_cell"]),
+                    ConfBar(conf, width=3.8 * cm, height=8),
+                ]
+            )
 
         col_widths = [2.8 * cm, 7.2 * cm, 2.2 * cm, 4.3 * cm]
         tbl = Table(rows, colWidths=col_widths, hAlign="LEFT", repeatRows=1)
-        tbl.setStyle(TableStyle([
-            # Header row — fond vert foncé, texte BLANC
-            ("BACKGROUND",    (0, 0), (-1, 0), GREEN_DARK),
-            ("TEXTCOLOR",     (0, 0), (-1, 0), WHITE),
-            ("FONTNAME",      (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE",      (0, 0), (-1, 0), 9),
-            ("ALIGN",         (0, 0), (-1, 0), "CENTER"),
-            # Data rows alternées
-            ("ROWBACKGROUNDS",(0, 1), (-1, -1), [WHITE, GREEN_PALE]),
-            ("FONTNAME",      (0, 1), (-1, -1), "Helvetica"),
-            ("FONTSIZE",      (0, 1), (-1, -1), 8),
-            # Grille
-            ("GRID",          (0, 0), (-1, -1), 0.4, colors.HexColor("#CED4DA")),
-            ("LINEBELOW",     (0, 0), (-1, 0), 1.2, GREEN_MID),
-            # Padding
-            ("TOPPADDING",    (0, 0), (-1, -1), 5),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-            ("LEFTPADDING",   (0, 0), (-1, -1), 7),
-            ("RIGHTPADDING",  (0, 0), (-1, -1), 7),
-            ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
-        ]))
+        tbl.setStyle(
+            TableStyle(
+                [
+                    # Header row — fond vert foncé, texte BLANC
+                    ("BACKGROUND", (0, 0), (-1, 0), GREEN_DARK),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), WHITE),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, 0), 9),
+                    ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+                    # Data rows alternées
+                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [WHITE, GREEN_PALE]),
+                    ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                    ("FONTSIZE", (0, 1), (-1, -1), 8),
+                    # Grille
+                    ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#CED4DA")),
+                    ("LINEBELOW", (0, 0), (-1, 0), 1.2, GREEN_MID),
+                    # Padding
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 7),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ]
+            )
+        )
         story.append(tbl)
 
     doc.build(story)
     return output_path
+
+def open_pdf_report(path: str) -> None:
+    """Open the generated PDF report with the default system viewer."""
+    import webbrowser
+
+    if os.path.exists(path):
+        webbrowser.open_new(path)
+    else:
+        print(f"Le fichier PDF n'existe pas : {path}")
