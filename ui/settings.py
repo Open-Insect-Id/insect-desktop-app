@@ -43,6 +43,8 @@ class SettingsWindow(ctk.CTkToplevel):
             with open("./utils/settings.txt","w") as settings:
                 settings.write("".join(txt))
             return
+        if input_color is not None:
+            pass # No input provided
         if len(input_color) == 7 and input_color[0] == "#":
             input_color = input_color[1:7]
         elif len(input_color) == 6:
