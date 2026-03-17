@@ -28,8 +28,6 @@ THEME = {
     "icon_size": (24, 24),
 }
 
-
-
 # Icons mapping
 ICON_MAPPING = {
     "upload": "upload.png",
@@ -42,6 +40,9 @@ ICON_MAPPING = {
     "pdf": "pdf.png",
     "link": "link.png",
     "settings": "settings.png",
+    "positive": "positive.png",
+    "negative": "negative.png",
+    "ambiguous": "ambiguous.png",
 }
 
 # Dimensions

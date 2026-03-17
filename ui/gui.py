@@ -6,7 +6,7 @@ import customtkinter as ctk
 from PIL import Image
 
 import config
-from ui.Theme import Theme
+from ui.theme import Theme
 from utils.logger import setup_logger
 from mobile_server.server import IMAGE_QUEUE
 

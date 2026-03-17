@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from ui.Theme import Theme
+from ui.theme import Theme
 from utils.logger import setup_logger
 from utils.settings_db import get_theme
 
@@ -13,6 +13,7 @@ import customtkinter as ctk
 # Used AI to write that, as it is horrible to draw it in python and tkinter
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 class ColorPickerDialog(ctk.CTkToplevel):
     """
     A modal HSV color picker.
@@ -20,8 +21,8 @@ class ColorPickerDialog(ctk.CTkToplevel):
     on cancel self.result stays None.
     """
 
-    SQ = 220          # size of the hue/saturation square
-    BAR_W = 24        # width of the hue & value bars
+    SQ = 220  # size of the hue/saturation square
+    BAR_W = 24  # width of the hue & value bars
 
     def __init__(self, parent, initial_color: str, title: str = "Pick a color"):
         super().__init__(parent)
@@ -59,21 +60,28 @@ class ColorPickerDialog(ctk.CTkToplevel):
 
         SQ, BW = self.SQ, self.BAR_W
 
-        self._sv_canvas = tk.Canvas(canvas_frame, width=SQ, height=SQ,
-                                    highlightthickness=1, cursor="crosshair")
+        self._sv_canvas = tk.Canvas(
+            canvas_frame, width=SQ, height=SQ, highlightthickness=1, cursor="crosshair"
+        )
         self._sv_canvas.grid(row=0, column=0, padx=(0, 8))
         self._sv_canvas.bind("<Button-1>", self._on_sv_click)
         self._sv_canvas.bind("<B1-Motion>", self._on_sv_click)
 
-        self._hue_canvas = tk.Canvas(canvas_frame, width=BW, height=SQ,
-                                     highlightthickness=1, cursor="sb_v_double_arrow")
+        self._hue_canvas = tk.Canvas(
+            canvas_frame,
+            width=BW,
+            height=SQ,
+            highlightthickness=1,
+            cursor="sb_v_double_arrow",
+        )
         self._hue_canvas.grid(row=0, column=1, padx=(0, 8))
         self._hue_canvas.bind("<Button-1>", self._on_hue_click)
         self._hue_canvas.bind("<B1-Motion>", self._on_hue_click)
 
         # ── preview swatch ──
-        self._preview = tk.Canvas(canvas_frame, width=BW * 2, height=SQ,
-                                  highlightthickness=1)
+        self._preview = tk.Canvas(
+            canvas_frame, width=BW * 2, height=SQ, highlightthickness=1
+        )
         self._preview.grid(row=0, column=2)
 
         # ── hex entry ──
@@ -82,7 +90,9 @@ class ColorPickerDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(entry_frame, text="Hex:").pack(side="left", padx=(0, 6))
         self._hex_var = tk.StringVar(value=self._hsv_to_hex(self._h, self._s, self._v))
-        self._hex_entry = ctk.CTkEntry(entry_frame, textvariable=self._hex_var, width=100)
+        self._hex_entry = ctk.CTkEntry(
+            entry_frame, textvariable=self._hex_var, width=100
+        )
         self._hex_entry.pack(side="left")
         self._hex_entry.bind("<Return>", self._on_hex_enter)
         self._hex_entry.bind("<FocusOut>", self._on_hex_enter)
@@ -95,12 +105,24 @@ class ColorPickerDialog(ctk.CTkToplevel):
         hc = self.theme.hover_color
         tc = self.theme.text
 
-        ctk.CTkButton(btn_frame, text="OK", width=90,
-                      fg_color=pc, hover_color=hc, text_color=tc,
-                      command=self._on_ok).pack(side="left", padx=8)
-        ctk.CTkButton(btn_frame, text="Annuler", width=90,
-                      fg_color=pc, hover_color=hc, text_color=tc,
-                      command=self.destroy).pack(side="left", padx=8)
+        ctk.CTkButton(
+            btn_frame,
+            text="OK",
+            width=90,
+            fg_color=pc,
+            hover_color=hc,
+            text_color=tc,
+            command=self._on_ok,
+        ).pack(side="left", padx=8)
+        ctk.CTkButton(
+            btn_frame,
+            text="Annuler",
+            width=90,
+            fg_color=pc,
+            hover_color=hc,
+            text_color=tc,
+            command=self.destroy,
+        ).pack(side="left", padx=8)
 
     # ── drawing ───────────────────────────────────────────────────────────────
 
@@ -128,7 +150,7 @@ class ColorPickerDialog(ctk.CTkToplevel):
             rows.append("{" + " ".join(row_pixels) + "}")
         img.put(" ".join(rows))
         canvas.create_image(0, 0, anchor="nw", image=img, tags="sv")
-        canvas._sv_img = img          # keep a reference
+        canvas._sv_img = img  # keep a reference
 
     def _draw_hue_bar(self):
         """Draw a vertical rainbow hue bar."""
@@ -152,17 +174,29 @@ class ColorPickerDialog(ctk.CTkToplevel):
         cx = int(self._s * (SQ - 1))
         cy = int((1.0 - self._v) * (SQ - 1))
         r = 6
-        self._sv_canvas.create_oval(cx - r, cy - r, cx + r, cy + r,
-                                    outline="white", width=2, tags="cursor")
-        self._sv_canvas.create_oval(cx - r + 1, cy - r + 1, cx + r - 1, cy + r - 1,
-                                    outline="black", width=1, tags="cursor")
+        self._sv_canvas.create_oval(
+            cx - r, cy - r, cx + r, cy + r, outline="white", width=2, tags="cursor"
+        )
+        self._sv_canvas.create_oval(
+            cx - r + 1,
+            cy - r + 1,
+            cx + r - 1,
+            cy + r - 1,
+            outline="black",
+            width=1,
+            tags="cursor",
+        )
 
     def _draw_hue_cursor(self):
         self._hue_canvas.delete("hcursor")
         SQ, BW = self.SQ, self.BAR_W
         cy = int(self._h * (SQ - 1))
-        self._hue_canvas.create_line(0, cy, BW, cy, fill="white", width=2, tags="hcursor")
-        self._hue_canvas.create_line(0, cy + 1, BW, cy + 1, fill="black", width=1, tags="hcursor")
+        self._hue_canvas.create_line(
+            0, cy, BW, cy, fill="white", width=2, tags="hcursor"
+        )
+        self._hue_canvas.create_line(
+            0, cy + 1, BW, cy + 1, fill="black", width=1, tags="hcursor"
+        )
 
     def _update_preview(self):
         color = self._hsv_to_hex(self._h, self._s, self._v)
@@ -206,6 +240,7 @@ class ColorPickerDialog(ctk.CTkToplevel):
     @staticmethod
     def _hsv_to_rgb(h, s, v):
         import colorsys
+
         r, g, b = colorsys.hsv_to_rgb(h, s, v)
         return int(r * 255), int(g * 255), int(b * 255)
 
@@ -216,6 +251,7 @@ class ColorPickerDialog(ctk.CTkToplevel):
     @staticmethod
     def _hex_to_hsv(hex_color: str):
         import colorsys
+
         hex_color = hex_color.lstrip("#")
-        r, g, b = (int(hex_color[i:i+2], 16) / 255 for i in (0, 2, 4))
+        r, g, b = (int(hex_color[i : i + 2], 16) / 255 for i in (0, 2, 4))
         return colorsys.rgb_to_hsv(r, g, b)

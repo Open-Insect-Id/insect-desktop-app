@@ -44,6 +44,7 @@
   "hover_button": "Button hover color",
   "background": "Background color",
   "text_color": "Text color",
+  "widget_background": "Widget background color",
   "restart_warning": "To apply changes to the main menu, you must restart Open Insect Identifier!",
   "change": "Change",
   "button_upload": "Upload Image",
@@ -56,5 +57,10 @@
   "error_load_image": "Unable to load image",
   "error_load_model": "Unable to load model",
   "error_analyze": "Oops, something went wrong",
-  "success": "✅ ANALYSIS RESULTS"
+  "success": "✅ ANALYSIS RESULTS",
+  "confidence_title": "Confidence",
+  "sure": "Sure",
+  "ambiguous": "Ambiguous",
+  "unsure": "Unsure",
+  "analysis_success": "Analysis successful!"
 }

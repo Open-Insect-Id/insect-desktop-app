@@ -33,17 +33,13 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
         if not images:
             ctk.CTkLabel(
                 self,
-                text=(
-                    self.i18n.t("no_images_found")
-                    if self.i18n
-                    else "Pas d'images trouvées"
-                ),
+                text=(self.i18n.t("no_images_found")),
                 font=ctk.CTkFont(slant="italic"),
             ).grid(row=0, column=0, columnspan=self._columns, padx=20, pady=20)
             return
 
         # Show loading text + progress bar
-        loading_text = f"{self.i18n.t('loading_images') if self.i18n else 'Chargement des images…'} (0/{len(images)})"
+        loading_text = f"{self.i18n.t("loading_images")} (0/{len(images)})"
         self.loading_label = ctk.CTkLabel(self, text=loading_text)
         self.loading_label.grid(
             row=0, column=0, columnspan=self._columns, padx=20, pady=(20, 5)
@@ -86,7 +82,7 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
 
     def _update_loading_label(self, loaded: int, total: int):
         try:
-            loading_text = f"{self.i18n.t('loading_images') if self.i18n else 'Chargement des images…'} ({loaded}/{total})"
+            loading_text = f"{self.i18n.t("loading_images")} ({loaded}/{total})"
             self.loading_label.configure(text=loading_text)
             if self.loading_bar:
                 self.loading_bar.set(min(max(loaded / total, 0.0), 1.0))
@@ -130,7 +126,7 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
 
     def _open_image_popup(self, image: Image.Image):
         popup = ctk.CTkToplevel(self)
-        popup.title(self.i18n.t("image_popup_title") if self.i18n else "Image agrandie")
+        popup.title(self.i18n.t("image_popup_title"))
         popup.geometry("850x850")
 
         display_image = image.copy()

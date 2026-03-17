@@ -2,7 +2,7 @@ import customtkinter as ctk
 from PIL import Image
 
 from config import THEME
-from ui.Theme import Theme
+from ui.theme import Theme
 
 
 def show_box_popup(parent, img_boxes, theme: Theme, i18n=None):

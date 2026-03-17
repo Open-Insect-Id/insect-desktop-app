@@ -19,21 +19,19 @@ class MainView(ctk.CTkFrame):
 
         self.theme = get_theme()
 
-        self.grid_rowconfigure(0, weight=5)
-        self.grid_rowconfigure(1, weight=4)
-        self.grid_columnconfigure(0, weight=1)
+        # Grille principale 2x2, chaque quadrant occupe 1/4 de la fenêtre
+        self.grid_rowconfigure(0, weight=1, uniform="row")
+        self.grid_rowconfigure(1, weight=1, uniform="row")
+        self.grid_columnconfigure(0, weight=1, uniform="col")
+        self.grid_columnconfigure(1, weight=1, uniform="col")
 
-        # Zone Image
+        # Haut gauche : image
         self.image_frame = ctk.CTkFrame(
             self, fg_color=("gray90", "gray16"), corner_radius=10
         )
-        self.image_frame.grid(row=0, column=0, sticky="nsew", pady=(0, 20))
+        self.image_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         self.image_frame.pack_propagate(False)
-
-        # Set the background color to the widget background from settings
         self.image_frame.configure(fg_color=self.theme.widget_background)
-
-
         self.lbl_image = ctk.CTkLabel(
             self.image_frame,
             text=(
@@ -46,37 +44,65 @@ class MainView(ctk.CTkFrame):
         )
         self.lbl_image.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Bottom area (results left, images right)
-        self.result_frame = ctk.CTkFrame(self)
-        # Set the background color to the widget background from settings
-        self.theme.apply_bg_to(self.result_frame)
+        # Haut droite : boîte texte
+        self.text_box_frame = ctk.CTkFrame(
+            self, fg_color=("gray90", "gray16"), corner_radius=10
+        )
+        self.text_box_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+        self.text_box_frame.pack_propagate(False)
+        self.theme.apply_widget_bg_to(self.text_box_frame)
+        self.text_box = ctk.CTkLabel(
+            self.text_box_frame, text="", font=ctk.CTkFont(size=16), text_color="gray50"
+        )
+        self.text_box.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Make 2 equal columns
-        self.result_frame.grid_columnconfigure(0, weight=1)
-        self.result_frame.grid_columnconfigure(1, weight=1)
-        self.result_frame.grid_rowconfigure(0, weight=1)
+        # Bas gauche : scores + barre globale
+        self.scores_frame = ctk.CTkFrame(
+            self, fg_color=("gray90", "gray16"), corner_radius=10
+        )
+        self.scores_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        self.scores_frame.pack_propagate(False)
+        self.theme.apply_widget_bg_to(self.scores_frame)
 
-        # LEFT — probabilities
-        self.result_scores_container = ctk.CTkFrame(self.result_frame)
-        self.result_scores_container.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+        # Container scores + barre globale (vertical, 3 lignes égales)
+        self.scores_frame.grid_rowconfigure(0, weight=1, uniform="score")
+        self.scores_frame.grid_rowconfigure(1, weight=1, uniform="score")
+        self.scores_frame.grid_rowconfigure(2, weight=1, uniform="score")
+        self.scores_frame.grid_columnconfigure(0, weight=1)
 
-        # Set the background color to the widget background from settings
+        # Grille 2x2 pour les scores (ligne 0 et 1)
+        self.result_scores_container = ctk.CTkFrame(self.scores_frame)
+        self.result_scores_container.grid(row=0, column=0, rowspan=2, sticky="nsew")
+        self.result_scores_container.grid_columnconfigure(
+            0, weight=1, uniform="score_col"
+        )
+        self.result_scores_container.grid_columnconfigure(
+            1, weight=1, uniform="score_col"
+        )
+        self.result_scores_container.grid_rowconfigure(0, weight=1, uniform="score_row")
+        self.result_scores_container.grid_rowconfigure(1, weight=1, uniform="score_row")
         self.theme.apply_widget_bg_to(self.result_scores_container)
 
+        # Box pour la barre globale (ligne 2), non visible par défaut
+        self.global_confidence_box = ctk.CTkFrame(
+            self.scores_frame,
+            fg_color=("gray80", "gray25"),
+            corner_radius=10,
+        )
+        self.global_confidence_box.grid_columnconfigure(0, weight=1)
+        self.global_confidence_bar = None
+        self.global_confidence_label = None
+        self.global_confidence_box.grid_columnconfigure(0, weight=0)  # icône+texte
+        self.global_confidence_box.grid_columnconfigure(1, weight=1)  # barre
+        self.global_confidence_box.grid_columnconfigure(2, weight=0)  # label %
+        self.global_confidence_icon_label = None
+        self.global_confidence_bar = None
+        self.global_confidence_label = None
 
-
-        # RIGHT — API images grid
-        self.api_images_container = ApiResultFrame(self.result_frame)
-        self.api_images_container.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
-
-        # Set the background color to the widget background from settings
+        # Bas droite : galerie
+        self.api_images_container = ApiResultFrame(self, i18n=self.i18n)
+        self.api_images_container.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
         self.theme.apply_widget_bg_to(self.api_images_container)
-
-    def show_results_area(self):
-        self.result_frame.grid(row=1, column=0, sticky="nsew")
-
-    def hide_results_area(self):
-        self.result_frame.grid_remove()
 
     def display_image(self, img, new_size):
         # Create new CTkImage instance
@@ -91,11 +117,7 @@ class MainView(ctk.CTkFrame):
     def clear_image(self):
         self.lbl_image.configure(
             image=None,
-            text=(
-                self.i18n.t("no_image_selected")
-                if self.i18n
-                else "Aucune image sélectionnée"
-            ),
+            text=(self.i18n.t("no_image_selected")),
         )
         try:
             self.lbl_image._label.configure(image="")
@@ -109,47 +131,43 @@ class MainView(ctk.CTkFrame):
         for widget in self.result_scores_container.winfo_children():
             widget.destroy()
         for widget in self.api_images_container.winfo_children():
-            # We can't destroy the container itself, but we should clear it
-            # Assuming ApiResultFrame handles its own clearing or we can just destroy its children if it's not managed internally
             pass
-        # Actually ApiResultFrame might need a clear method, but gui.py used winfo_children.
         for widget in self.api_images_container.winfo_children():
             widget.destroy()
+        # Supprime la barre globale, le label et la box s'ils existent
+        if self.global_confidence_bar:
+            self.global_confidence_bar.destroy()
+            self.global_confidence_bar = None
+        if self.global_confidence_label:
+            self.global_confidence_label.destroy()
+            self.global_confidence_label = None
+        if hasattr(self, "global_confidence_box") and self.global_confidence_box:
+            for widget in self.global_confidence_box.winfo_children():
+                widget.destroy()
+                self.global_confidence_icon_label = None
+            self.global_confidence_box.grid_remove()
 
     def display_loading(self):
         self.clear_results()
-        self.show_results_area()
+        self.global_confidence_box.grid(row=2, column=0, sticky="nsew", padx=5, pady=4)
+        for widget in self.global_confidence_box.winfo_children():
+            widget.destroy()
+        self.global_confidence_box.grid_columnconfigure(0, weight=1)
         loading_label = ctk.CTkLabel(
-            self.result_scores_container,
-            text=(
-                self.i18n.t("analysis_start") if self.i18n else "⏳ Analyse en cours..."
-            ),
+            self.global_confidence_box,
+            text=(self.i18n.t("analysis_start")),
             font=ctk.CTkFont(size=16, slant="italic"),
+            anchor="center",
         )
-        loading_label.grid(row=0, column=0, pady=40)
+        loading_label.grid(row=0, column=0, pady=10, sticky="nsew")
         return loading_label
 
     def display_results(self, results_data):
         self.clear_results()
-        self.show_results_area()
 
-        # Titre des résultats
-        title_text = (
-            self.i18n.t("results_title") if self.i18n else "🔎 RÉSULTATS DE L'ANALYSE"
-        )
-        title = ctk.CTkLabel(
-            self.result_scores_container,
-            text=title_text,
-            font=ctk.CTkFont(size=20, weight="bold"),
-            text_color=("gray10", "gray90"),
-        )
-        title.grid(row=0, column=0, columnspan=2, sticky="w", pady=(10, 20), padx=10)
-
-        # Configurer la grille 2x2
-        self.result_scores_container.grid_columnconfigure((0, 1), weight=1)
-
-        # Afficher chaque résultat
-        for i, (level, name, conf, map_url) in enumerate(results_data):
+        # Afficher chaque résultat dans la grille 2x2
+        avg_conf = results_data[-1] if results_data else None
+        for i, (level, name, conf) in enumerate(results_data[:-1]):
             if i >= 4:
                 break
 
@@ -160,13 +178,12 @@ class MainView(ctk.CTkFrame):
                 self.result_scores_container,
                 fg_color=card_bg,
                 corner_radius=10,
-                border_width=1 if is_winner else 0,
+                border_width=0,
                 border_color=config.THEME.get("primary_color"),
             )
-            row = (i // 2) + 1
+            row = i // 2
             col = i % 2
-            card_frame.grid(row=row, column=col, sticky="ew", pady=4, padx=5)
-
+            card_frame.grid(row=row, column=col, sticky="nsew", padx=5, pady=4)
             card_frame.grid_columnconfigure(0, weight=1)
 
             content_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
@@ -239,15 +256,68 @@ class MainView(ctk.CTkFrame):
             )
             progress_label.grid(row=0, column=1, sticky="e")
 
-
-        # Possible card showing the confidence - not implemented yet
-
-        # card_bg = ("gray80", "gray25") if is_winner else ("gray85", "gray20")
-        #
-        # confidence_frame = ctk.CTkFrame(
-        #     self.result_scores_container,
-        #     fg_color=card_bg,
-        #     corner_radius=10,
-        #     border_width=1 if is_winner else 0,
-        #     border_color=config.THEME.get("primary_color"),
-        # )
+        # Barre globale de confiance dans une box dédiée, ligne 2
+        if results_data:
+            global_conf = avg_conf if avg_conf is not None else 0
+            if global_conf >= 80:
+                g_color = "#2fa572"
+                icon_name = "positive"
+            elif global_conf >= 50:
+                g_color = "#d68c22"
+                icon_name = "ambiguous"
+            else:
+                g_color = "#cf3838"
+                icon_name = "negative"
+            for widget in self.global_confidence_box.winfo_children():
+                widget.destroy()
+            self.global_confidence_box.grid_rowconfigure(0, weight=0)
+            self.global_confidence_box.grid_rowconfigure(1, weight=1)
+            self.global_confidence_box.grid_rowconfigure(2, weight=0)
+            self.global_confidence_box.grid_columnconfigure(0, weight=1)
+            self.global_confidence_box.grid(
+                row=2, column=0, sticky="nsew", padx=5, pady=4
+            )
+            title_label = ctk.CTkLabel(
+                self.global_confidence_box,
+                text=self.i18n.t("confidence_title"),
+                font=ctk.CTkFont(size=14, weight="bold"),
+                anchor="w",
+            )
+            title_label.grid(
+                row=0, column=0, columnspan=2, sticky="w", padx=(10, 0), pady=(8, 0)
+            )
+            bar_frame = ctk.CTkFrame(self.global_confidence_box, fg_color="transparent")
+            bar_frame.grid(
+                row=1, column=0, columnspan=2, sticky="ew", padx=(10, 10), pady=(2, 2)
+            )
+            bar_frame.grid_columnconfigure(0, weight=1)
+            bar_frame.grid_columnconfigure(1, weight=0)
+            self.global_confidence_bar = ctk.CTkProgressBar(
+                bar_frame, height=16, corner_radius=8
+            )
+            self.global_confidence_bar.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+            self.global_confidence_bar.set(global_conf / 100.0)
+            self.global_confidence_bar.configure(progress_color=g_color)
+            self.global_confidence_label = ctk.CTkLabel(
+                bar_frame,
+                text=f"{global_conf:.0f}%",
+                font=ctk.CTkFont(size=13, weight="bold"),
+                width=40,
+                text_color=g_color,
+                anchor="e",
+            )
+            self.global_confidence_label.grid(row=0, column=1, sticky="e")
+            icon = self.icons.get(icon_name)
+            self.global_confidence_desc_label = ctk.CTkLabel(
+                self.global_confidence_box,
+                image=icon,
+                text=self.i18n.t(icon_name),
+                font=ctk.CTkFont(size=13),
+                compound="left",
+                anchor="w",
+                padx=8,
+            )
+            self.global_confidence_desc_label.grid(
+                row=2, column=0, columnspan=2, sticky="w", padx=(10, 0), pady=(12, 8)
+            )
+        progress_container.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 8))

@@ -1,11 +1,18 @@
+from utils.settings_db import get_lang
 import json
 import os
 
 
 class I18N:
-    def __init__(self, lang="fr"):
-        self.lang = lang
+    def __init__(self, lang=None):
+        # Si aucune langue n'est spécifiée, on la récupère depuis la DB
+        self.lang = lang if lang else get_lang()
         self.strings = {}
+        self.load_strings()
+
+    def refresh_from_db(self):
+        """Recharge la langue et les strings depuis la DB (utile après changement de langue)."""
+        self.lang = get_lang()
         self.load_strings()
 
     def load_strings(self):

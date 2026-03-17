@@ -43,6 +43,7 @@
   "main_button": "Couleur principale des boutons",
   "hover_button": "Couleur de sélection des boutons",
   "background": "Couleur de fond",
+  "widget_background": "Couleur de fond du widget",
   "text_color": "Couleur du texte",
   "restart_warning": "Afin d'appliquer les changements au menu principal, il faut redémarrer Open Insect Identifier!",
   "change": "Changer",
@@ -56,5 +57,10 @@
   "error_load_image": "Impossible de charger l'image",
   "error_load_model": "Impossible de charger le modèle",
   "error_analyze": "Oups bah ça marche pas",
-  "success": "✅ RÉSULTATS DE L'ANALYSE"
+  "success": "✅ RÉSULTATS DE L'ANALYSE",
+  "confidence_title": "Confiance",
+  "positive": "Sûr",
+  "ambiguous": "Ambigu",
+  "negative": "Non fiable",
+  "analysis_success": "Analyse réussie !"
 }

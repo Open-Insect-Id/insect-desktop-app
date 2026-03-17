@@ -1,4 +1,5 @@
 import logging
+from ui.status_utils import update_status
 from utils.auto_crop import draw_largest_box, crop_largest_box
 from ui.image_popup import show_box_popup
 from utils.observation_db import add_observation
@@ -13,7 +14,9 @@ def load_image_for_analysis(self, image_path, source_label):
     self.image_path = image_path
     self.display_image(image_path)
 
-    crop_choice = show_box_popup(self, img_boxes, self.theme, getattr(self, "i18n", None))
+    crop_choice = show_box_popup(
+        self, img_boxes, self.theme, getattr(self, "i18n", None)
+    )
     if crop_choice:
         try:
             cropped_path = crop_largest_box(
@@ -27,14 +30,8 @@ def load_image_for_analysis(self, image_path, source_label):
             logging.error("Error cropping image: %s", e)
             from tkinter import messagebox
 
-            msg_title = (
-                self.i18n.t("crop_image") if hasattr(self, "i18n") else "Crop Image"
-            )
-            msg_error = (
-                self.i18n.t("analysis_error")
-                if hasattr(self, "i18n")
-                else f"Impossible de recadrer l'image:\n{e}"
-            )
+            msg_title = self.i18n.t("crop_image")
+            msg_error = self.i18n.t("analysis_error")
             messagebox.showerror(
                 msg_title,
                 msg_error,
@@ -46,11 +43,7 @@ def load_image_for_analysis(self, image_path, source_label):
 
     self.sidebar.set_analyze_state("normal")
     self.update_clear_btn()
-    msg = (
-        self.i18n.t("ready")
-        if hasattr(self, "i18n")
-        else f"Image ready from {source_label}"
-    )
+    msg = self.i18n.t("ready")
     self.update_status(msg)
 
 
@@ -103,16 +96,13 @@ def run_inference(self):
             level = levels[i]
             name = names[i]
             conf = confidences[i]
-            results_data.append((level, name, conf, None))
+            results_data.append((level, name, conf))
+        results_data.append(avg_conf)
 
         gbif_url = gbif_info.get("url") if gbif_info else None
         self.sidebar.set_gbif_link(gbif_url)
 
-        status = (
-            f"Confiance: {avg_conf:.1f}% - {'Fiable ✅' if reliable else 'Incertain ⚠️'}"
-        )
-        if gbif_info and "url" in gbif_info:
-            status += f" | GBIF: {gbif_info['url']}"
+        update_status(self, self._status_message("analysis_success"))
 
         self.computed_insect_name = f"{names[2]} {names[3]}".strip()
         species_id, nub_id = get_species_id(self.computed_insect_name)
@@ -131,8 +121,6 @@ def run_inference(self):
 
         images = get_species_image(nub_id)
         logging.debug(f"Media count found: {len(images)}")
-
-        self.update_status(status)
 
         # Enregistrer l'observation dans le journal
         try:
