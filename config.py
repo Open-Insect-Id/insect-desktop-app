@@ -10,10 +10,10 @@ from pathlib import Path
 # The default colors for the interface
 DEFAULTS_COLORS = {
     "primary_color": "#1f6aa5",
-    "hover_color":   "#195985",
-    "background":    "#000000",
+    "hover_color": "#195985",
+    "background": "#000000",
     "widget_background": "#1e1e1e",
-    "text":          "#DCE4EE",
+    "text": "#DCE4EE",
 }
 
 # Appearance (for KT)
@@ -43,7 +43,31 @@ ICON_MAPPING = {
     "positive": "positive.png",
     "negative": "negative.png",
     "ambiguous": "ambiguous.png",
+    "github": "github.png",
 }
+
+CONTRIBUTORS = [
+    {
+        "name": "Yoann",
+        "icon": "https://avatars.githubusercontent.com/u/182555207?s=64&v=4",
+        "url": " https://github.com/YoannDev90",
+    },
+    {
+        "name": "Lucas",
+        "icon": "https://avatars.githubusercontent.com/u/85549951?s=64&v=4",
+        "url": "https://github.com/LuckyTheCookie",
+    },
+    {
+        "name": "Clovis",
+        "icon": "https://avatars.githubusercontent.com/u/150185321?s=64&v=4",
+        "url": "https://github.com/Elnix90",
+    },
+    {
+        "name": "Nathanael",
+        "icon": "https://avatars.githubusercontent.com/u/247614572?s=64&v=4",
+        "url": "https://github.com/NathanaelRBDev",
+    },
+]
 
 # Dimensions
 WINDOW_SIZE = {"width": 1200, "height": 800}

@@ -32,6 +32,7 @@ def export_report(self):
     file_path = filedialog.asksaveasfilename(
         defaultextension=".pdf",
         filetypes=[("PDF", "*.pdf")],
+        initialdir=os.path.expanduser("~/Documents"),
         initialfile=f"{suggested_name}.pdf",
         title=self.i18n.t("pdf") if hasattr(self, "i18n") else "Exporter en PDF",
     )
