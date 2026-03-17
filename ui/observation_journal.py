@@ -2,12 +2,16 @@ import io
 import os
 import platform
 import webbrowser
+import logging
 import config
 
 from PIL import Image
 import customtkinter as ctk
 
 from utils.observation_db import delete_observation, fetch_observations
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def _open_file(path: str) -> None:
@@ -38,7 +42,9 @@ def _load_placeholder_image(size=(86, 86)) -> ctk.CTkImage:
     try:
         import cairosvg
 
-        png_bytes = cairosvg.svg2png(url=svg_path, output_width=size[0], output_height=size[1])
+        png_bytes = cairosvg.svg2png(
+            url=svg_path, output_width=size[0], output_height=size[1]
+        )
         img = Image.open(io.BytesIO(png_bytes)).convert("RGBA")
         return ctk.CTkImage(light_image=img, dark_image=img, size=size)
     except Exception:
@@ -57,14 +63,15 @@ class ObservationJournalWindow(ctk.CTkToplevel):
         self.resizable(True, True)
         self._build_ui()
         self.refresh()
-        
 
     def _delete_and_refresh(self, observation_id: int) -> None:
         """Delete an entry from the database and refresh the view."""
+        logger.info(f"Suppression de l'observation ID: {observation_id}")
         try:
             delete_observation(observation_id)
-        except Exception:
-            pass
+            logger.info("Observation supprimée avec succès")
+        except Exception as e:
+            logger.error(f"Erreur lors de la suppression: {e}")
         self.refresh()
 
     def _build_ui(self):
@@ -157,7 +164,9 @@ class ObservationJournalWindow(ctk.CTkToplevel):
             if thumb:
                 thumb_label = ctk.CTkLabel(frame, image=thumb, text="")
             else:
-                thumb_label = ctk.CTkLabel(frame, image=self._placeholder_image, text="")
+                thumb_label = ctk.CTkLabel(
+                    frame, image=self._placeholder_image, text=""
+                )
             thumb_label.grid(row=0, column=0, rowspan=3, sticky="nsw", padx=12, pady=10)
 
             # Info principal (espèce + date)
@@ -178,13 +187,19 @@ class ObservationJournalWindow(ctk.CTkToplevel):
                 text_color="gray60",
                 anchor="w",
             )
-            timestamp_label.grid(row=1, column=1, sticky="w", padx=(12, 6), pady=(0, 10))
+            timestamp_label.grid(
+                row=1, column=1, sticky="w", padx=(12, 6), pady=(0, 10)
+            )
 
             # Statuts
             confidence = obs.get("confidence")
             reliable = obs.get("reliable")
             reliable_text = "✅ Fiable" if reliable else "⚠️ Incertain"
-            confidence_text = f"Confiance: {confidence:.1f}%" if confidence is not None else "Confiance: -"
+            confidence_text = (
+                f"Confiance: {confidence:.1f}%"
+                if confidence is not None
+                else "Confiance: -"
+            )
             status_label = ctk.CTkLabel(
                 frame,
                 text=f"{confidence_text}  •  {reliable_text}",
@@ -196,7 +211,9 @@ class ObservationJournalWindow(ctk.CTkToplevel):
 
             # Action buttons
             btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
-            btn_frame.grid(row=0, column=2, rowspan=3, sticky="e", padx=(0, 12), pady=10)
+            btn_frame.grid(
+                row=0, column=2, rowspan=3, sticky="e", padx=(0, 12), pady=10
+            )
             btn_frame.grid_columnconfigure(0, weight=0)
             btn_frame.grid_columnconfigure(1, weight=0)
 

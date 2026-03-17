@@ -40,7 +40,7 @@ def create_insect_map(species_name: str, coordinates: list, output_path: str = N
     for lat, lon in coordinates:
         folium.CircleMarker(
             location=[lat, lon],
-            radius=5,
+            radius=4,
             popup=f"{species_name}<br>Lat: {lat:.5f}<br>Lon: {lon:.5f}",
             color="#3388ff",
             fill=True,
@@ -49,7 +49,7 @@ def create_insect_map(species_name: str, coordinates: list, output_path: str = N
         ).add_to(m)
 
     # Ajouter un truc style map chaleur si beaucoup de points
-    if len(coordinates) > 50:
+    if len(coordinates) > 20:
         HeatMap(coordinates, radius=15, blur=25, max_zoom=13).add_to(m)
 
     # Sauvegarder la carte

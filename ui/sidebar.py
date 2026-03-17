@@ -177,19 +177,24 @@ class Sidebar(ctk.CTkFrame):
         self.lbl_status.pack(pady=5, fill="x")
 
     def update_status(self, text):
+        logger.info(f"Statut mis à jour: {text}")
         self.lbl_status.configure(text=text)
 
     def set_analyze_state(self, state):
+        logger.debug(f"État du bouton d'analyse: {state}")
         self.btn_analyze.configure(state=state)
 
     def set_clear_state(self, state):
+        logger.debug(f"État du bouton effacer: {state}")
         self.btn_clear.configure(state=state)
 
     def set_map_state(self, state):
+        logger.debug(f"État du bouton carte: {state}")
         self.btn_view_map.configure(state=state)
 
     def set_gbif_link(self, url: str | None):
         """Enable/disable the GBIF button depending on URL availability."""
+        logger.info(f"Lien GBIF mis à jour: {url}")
         self.gbif_url = url
         if url:
             self.btn_gbif.configure(state="normal")
@@ -198,4 +203,6 @@ class Sidebar(ctk.CTkFrame):
 
     def set_export_state(self, state):
         """Enable/disable the Export PDF button."""
+        logger.debug(f"État du bouton exporter PDF: {state}")
+        self.btn_export_pdf.configure(state=state)
         self.btn_export_pdf.configure(state=state)

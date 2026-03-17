@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import logging
 from datetime import datetime
 
 from reportlab.lib import colors
@@ -20,6 +21,10 @@ from reportlab.platypus import (
     TableStyle,
 )
 from reportlab.platypus.flowables import Flowable
+
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 # ── Palette ───────────────────────────────────────────────────────────────────
 GREEN_DARK = colors.HexColor("#1B4332")
@@ -459,6 +464,7 @@ def create_pdf_report(
 
     doc.build(story)
     return output_path
+
 
 def open_pdf_report(path: str) -> None:
     """Open the generated PDF report with the default system viewer."""

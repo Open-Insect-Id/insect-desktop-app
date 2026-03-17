@@ -5,6 +5,11 @@ The database is minimal and stored locally in the project root.
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+import logging
+
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 import config
 
@@ -21,6 +26,7 @@ def init_observation_db() -> None:
     """Create the observation database and tables if they do not exist."""
     db_path = get_db_path()
     db_path.parent.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Initialisation de la base d'observations: {db_path}")
 
     with sqlite3.connect(db_path) as conn:
         c = conn.cursor()
@@ -35,6 +41,7 @@ def init_observation_db() -> None:
             )"""
         )
         conn.commit()
+    logger.debug("Table observations créée/vérifiée")
 
 
 def add_observation(
@@ -48,6 +55,9 @@ def add_observation(
     timestamp = timestamp or datetime.now().isoformat(sep=" ", timespec="seconds")
     db_path = get_db_path()
 
+    logger.info(
+        f"Ajout d'observation: {species_name}, conf: {confidence}, img: {image_path}"
+    )
     with sqlite3.connect(db_path) as conn:
         c = conn.cursor()
         c.execute(
@@ -62,22 +72,26 @@ def add_observation(
             ),
         )
         conn.commit()
+    logger.debug("Observation enregistrée")
 
 
 def delete_observation(observation_id: int) -> None:
     """Delete a single observation record by its ID."""
     db_path = get_db_path()
+    logger.info(f"Suppression de l'observation ID: {observation_id}")
 
     with sqlite3.connect(db_path) as conn:
         c = conn.cursor()
         c.execute("DELETE FROM observations WHERE id = ?", (observation_id,))
         conn.commit()
+    logger.debug("Observation supprimée")
 
 
 def fetch_observations(limit: int | None = None) -> list[dict]:
     """Return all observations as a list of dicts, newest first."""
     db_path = get_db_path()
     if not db_path.exists():
+        logger.warning(f"Base d'observations non trouvée: {db_path}")
         return []
 
     query = "SELECT id, timestamp, image_path, species, confidence, reliable FROM observations"
@@ -94,4 +108,6 @@ def fetch_observations(limit: int | None = None) -> list[dict]:
             c.execute(query)
         rows = c.fetchall()
 
-    return [dict(row) for row in rows]
+    observations = [dict(row) for row in rows]
+    logger.info(f"{len(observations)} observations récupérées")
+    return observations

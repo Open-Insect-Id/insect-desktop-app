@@ -1,4 +1,12 @@
+import logging
+
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
+
+
 def clear_interface(self):
+    logger.info("Nettoyage complet de l'interface")
     self.main_view.clear_image()
     self.image_path = None
     self.computed_insect_name = None
@@ -14,6 +22,7 @@ def clear_interface(self):
 
 def clear_results(self):
     """Clears all result widgets"""
+    logger.info("Nettoyage des résultats")
     self.main_view.clear_results()
     self.sidebar.set_gbif_link(None)
     self.sidebar.set_export_state("disabled")

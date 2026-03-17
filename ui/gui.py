@@ -117,6 +117,7 @@ class InsectDetectorApp(ctk.CTk):
             if self.session is not None
             else self._status_message("model_missing")
         )
+        logger.info(f"Modèle {'disponible' if self.session else 'non disponible'}")
         self.update_status(status_text)
 
     def load_icons(self):
@@ -201,8 +202,8 @@ class InsectDetectorApp(ctk.CTk):
 
         clear_results(self)
 
-    def display_results(self, results_data):
-        self.main_view.display_results(results_data)
+    def display_results(self, results_data, wikipedia_summary=None):
+        self.main_view.display_results(results_data, wikipedia_summary)
         # If there are results, enable the map and erase buttons
         self.update_map_btn()
         self.update_clear_btn()

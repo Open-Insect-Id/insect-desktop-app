@@ -12,8 +12,10 @@ def load_onnx_detector(onnx_model_path):
     Charge le modèle ONNX de détection d'objet.
     Returns: session ONNX
     """
+    logger.info(f"Chargement du détecteur ONNX: {onnx_model_path}")
     global detector_session
     detector_session = ort.InferenceSession(str(onnx_model_path))
+    logger.info("Détecteur ONNX chargé avec succès")
     return detector_session
 
 

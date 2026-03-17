@@ -29,6 +29,7 @@ class ColoredFormatter(logging.Formatter):
 def setup_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
+    logger.propagate = False
     if not logger.handlers:
         # Console handler with colors
         console_formatter = ColoredFormatter(

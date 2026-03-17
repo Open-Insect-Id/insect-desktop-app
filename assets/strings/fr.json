@@ -62,5 +62,6 @@
   "positive": "Sûr",
   "ambiguous": "Ambigu",
   "negative": "Non fiable",
-  "analysis_success": "Analyse réussie !"
+  "analysis_success": "Analyse réussie !",
+  "no_wikipedia_summary": "Aucun résumé Wikipédia disponible."
 }

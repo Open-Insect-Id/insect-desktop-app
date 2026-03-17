@@ -57,6 +57,7 @@ def load_icons(self):
     """Charge les icônes depuis ui/icons."""
     import config
 
+    logger.info("Chargement des icônes...")
     icon_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)), "assets", "icons"
     )
@@ -69,6 +70,10 @@ def load_icons(self):
                 dark_image=Image.open(path),
                 size=config.THEME.get("icon_size", (24, 24)),
             )
+            logger.debug(f"Icône chargée: {key} -> {filename}")
         else:
-            logger.warning(f"Icon not found: {path}")
+            logger.warning(f"Icône non trouvée: {path}")
             self.icons[key] = None
+    logger.info(
+        f"{len([v for v in self.icons.values() if v])} icônes chargées avec succès"
+    )

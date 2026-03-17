@@ -1,10 +1,18 @@
+import logging
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
+
+
 class Theme:
     def __init__(self, theme: dict[str, str]):
+        logger.debug(f"Création d'un Theme à partir de: {theme}")
         self.primary_color = theme.get("primary_color", "#1f6aa5")
         self.hover_color = theme.get("hover_color", "#195985")
         self.background = theme.get("background", "#000000")
         self.widget_background = theme.get("widget_background", "#1e1e1e")
         self.text = theme.get("text", "#DCE4EE")
+        logger.debug(f"Theme créé: {self}")
 
     def as_dict(self) -> dict:
         return {

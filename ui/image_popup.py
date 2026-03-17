@@ -1,8 +1,12 @@
 import customtkinter as ctk
 from PIL import Image
+import logging
 
 from config import THEME
 from ui.theme import Theme
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def show_box_popup(parent, img_boxes, theme: Theme, i18n=None):
@@ -13,12 +17,12 @@ def show_box_popup(parent, img_boxes, theme: Theme, i18n=None):
     i18n : I18N instance (optional)
     Retourne True (recadrer), False (garder), ou None (fermé)
     """
+    logger.info("Affichage de la popup de recadrage")
     popup = ctk.CTkToplevel(parent)
     popup.title(i18n.t("crop_image") if i18n else "Recadrer l'image ?")
     popup.geometry("600x500")
     popup.grab_set()
     theme.apply_bg_to(popup)
-
 
     ratio = min(550 / img_boxes.width, 400 / img_boxes.height)
     new_size = (int(img_boxes.width * ratio), int(img_boxes.height * ratio))
@@ -34,10 +38,12 @@ def show_box_popup(parent, img_boxes, theme: Theme, i18n=None):
     result = {"crop": None}
 
     def on_crop():
+        logger.info("Utilisateur a choisi de recadrer l'image")
         result["crop"] = True
         popup.destroy()
 
     def on_no_crop():
+        logger.info("Utilisateur a choisi de garder l'image entière")
         result["crop"] = False
         popup.destroy()
 
@@ -58,4 +64,5 @@ def show_box_popup(parent, img_boxes, theme: Theme, i18n=None):
     no_crop_btn.pack(side="left", padx=10)
 
     popup.wait_window()
+    logger.debug("Popup de recadrage fermée")
     return result["crop"]

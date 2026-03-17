@@ -1,4 +1,4 @@
-from utils.settings_db import set_setting, get_setting
+from utils.settings_db import set_lang, get_lang
 
 LANGUAGES = {"fr": "Français", "en": "English"}
 import tkinter as tk
@@ -23,6 +23,7 @@ class SettingsWindow(ctk.CTkToplevel):
     ]
 
     def __init__(self, parent, i18n=None):
+        logger.info("Ouverture de la fenêtre des paramètres")
         super().__init__(parent)
         self.i18n = i18n
         self.title(self.i18n.t("settings") if self.i18n else "Paramètres")
@@ -62,9 +63,7 @@ class SettingsWindow(ctk.CTkToplevel):
 
         # Ajout du réglage de langue
         # Récupère la langue depuis la DB si possible
-        lang_db = (
-            get_setting("language") if callable(globals().get("get_setting")) else None
-        )
+        lang_db = get_lang()
         self.language_var = ctk.StringVar(
             value=lang_db or (self.i18n.lang if self.i18n else "fr")
         )
@@ -88,7 +87,7 @@ class SettingsWindow(ctk.CTkToplevel):
         # Trouve la clé de langue à partir du label
         lang_code = next((k for k, v in LANGUAGES.items() if v == selected_label), "fr")
         try:
-            set_setting("language", lang_code)
+            set_lang(lang_code)
         except Exception as e:
             print(f"Erreur lors de la sauvegarde de la langue dans la DB: {e}")
         # Redémarre ou recharge l'UI selon l'implémentation de l'app

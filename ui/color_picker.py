@@ -25,6 +25,9 @@ class ColorPickerDialog(ctk.CTkToplevel):
     BAR_W = 24  # width of the hue & value bars
 
     def __init__(self, parent, initial_color: str, title: str = "Pick a color"):
+        logger.info(
+            f"Ouverture du sélecteur de couleur avec couleur initiale: {initial_color}"
+        )
         super().__init__(parent)
         self.title(title)
         self.resizable(False, False)
@@ -34,6 +37,7 @@ class ColorPickerDialog(ctk.CTkToplevel):
 
         # Parse initial color → h, s, v
         self._h, self._s, self._v = self._hex_to_hsv(initial_color)
+        logger.debug(f"Couleur HSV initiale: h={self._h}, s={self._s}, v={self._v}")
 
         self._build_ui()
         self._draw_all()

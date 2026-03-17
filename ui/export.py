@@ -1,11 +1,17 @@
 from tkinter import filedialog, messagebox
 import os
+import logging
+from utils.logger import setup_logger
 from utils.pdf_report import create_pdf_report, open_pdf_report
+
+logger = setup_logger(__name__)
 
 
 def export_report(self):
     """Export a PDF report for the last analysis."""
+    logger.info("Demande d'export PDF")
     if not self.last_results_data or not self.image_path:
+        logger.warning("Pas de données disponibles pour l'export PDF")
         msg = (
             self.i18n.t("analysis_error")
             if hasattr(self, "i18n")
@@ -30,9 +36,11 @@ def export_report(self):
         title=self.i18n.t("pdf") if hasattr(self, "i18n") else "Exporter en PDF",
     )
     if not file_path:
+        logger.info("Export PDF annulé par l'utilisateur")
         return
 
     try:
+        logger.info(f"Création du rapport PDF: {file_path}")
         create_pdf_report(
             output_path=file_path,
             image_path=self.image_path,
@@ -43,6 +51,7 @@ def export_report(self):
             gbif_url=self.last_gbif_url,
             wikipedia_summary=self.last_wikipedia_summary,
         )
+        logger.info("Rapport PDF créé avec succès")
         self.update_status(
             f"{self.i18n.t('pdf') if hasattr(self, 'i18n') else 'Rapport exporté'} : {os.path.basename(file_path)}"
         )
@@ -56,9 +65,7 @@ def export_report(self):
         )
         open_pdf_report(file_path)
     except Exception as e:
-        import logging
-
-        logging.error("Erreur lors de l'export PDF: %s", e)
+        logger.error(f"Erreur lors de l'export PDF: {e}", exc_info=True)
         self.update_status(
             self.i18n.t("analysis_error")
             if hasattr(self, "i18n")

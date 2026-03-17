@@ -62,5 +62,6 @@
   "sure": "Sure",
   "ambiguous": "Ambiguous",
   "unsure": "Unsure",
-  "analysis_success": "Analysis successful!"
+  "analysis_success": "Analysis successful!",
+  "no_wikipedia_summary": "No Wikipedia summary available."
 }

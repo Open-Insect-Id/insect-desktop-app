@@ -51,10 +51,16 @@ class MainView(ctk.CTkFrame):
         self.text_box_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
         self.text_box_frame.pack_propagate(False)
         self.theme.apply_widget_bg_to(self.text_box_frame)
-        self.text_box = ctk.CTkLabel(
-            self.text_box_frame, text="", font=ctk.CTkFont(size=16), text_color="gray50"
+        # Configurer la grille pour que le textbox occupe tout l'espace
+        self.text_box_frame.grid_rowconfigure(0, weight=1)
+        self.text_box_frame.grid_columnconfigure(0, weight=1)
+        self.text_box = ctk.CTkTextbox(
+            self.text_box_frame,
+            font=ctk.CTkFont(size=15),
+            activate_scrollbars=True,
         )
-        self.text_box.place(relx=0.5, rely=0.5, anchor="center")
+        self.text_box.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        self.text_box.configure(state="disabled")
 
         # Bas gauche : scores + barre globale
         self.scores_frame = ctk.CTkFrame(
@@ -146,6 +152,10 @@ class MainView(ctk.CTkFrame):
                 widget.destroy()
                 self.global_confidence_icon_label = None
             self.global_confidence_box.grid_remove()
+        # Effacer la textbox du résumé Wikipédia
+        self.text_box.configure(state="normal")
+        self.text_box.delete("0.0", "end")
+        self.text_box.configure(state="disabled")
 
     def display_loading(self):
         self.clear_results()
@@ -162,8 +172,25 @@ class MainView(ctk.CTkFrame):
         loading_label.grid(row=0, column=0, pady=10, sticky="nsew")
         return loading_label
 
-    def display_results(self, results_data):
+    def display_results(self, results_data, wikipedia_summary=None):
+        logger.info("Affichage des résultats de l'analyse")
         self.clear_results()
+
+        # Affiche le résumé Wikipédia dans la textbox (lecture seule)
+        self.text_box.configure(state="normal")
+        self.text_box.delete("0.0", "end")
+        if wikipedia_summary:
+            self.text_box.insert("0.0", wikipedia_summary)
+        else:
+            self.text_box.insert(
+                "0.0",
+                (
+                    self.i18n.t("no_wikipedia_summary")
+                    if self.i18n
+                    else "Aucun résumé disponible."
+                ),
+            )
+        self.text_box.configure(state="disabled")
 
         # Afficher chaque résultat dans la grille 2x2
         avg_conf = results_data[-1] if results_data else None

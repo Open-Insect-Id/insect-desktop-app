@@ -3,9 +3,14 @@ from ui.status_utils import update_status
 from utils.auto_crop import draw_largest_box, crop_largest_box
 from ui.image_popup import show_box_popup
 from utils.observation_db import add_observation
+from utils.logger import setup_logger
+from utils.settings_db import get_lang
+
+logger = setup_logger(__name__)
 
 
 def load_image_for_analysis(self, image_path, source_label):
+    logger.info(f"Chargement de l'image: {image_path}")
     img_boxes = draw_largest_box(
         image_path,
         self.detector_session,
@@ -48,7 +53,9 @@ def load_image_for_analysis(self, image_path, source_label):
 
 
 def start_analysis(self):
+    logger.info("Démarrage de l'analyse...")
     if not self.image_path or self.analyzing:
+        logger.debug("Analyse déjà en cours ou pas d'image.")
         return
     if self.session is None:
         self.clear_results()
@@ -78,6 +85,7 @@ def start_analysis(self):
 
 
 def run_inference(self):
+    logger.info("Exécution de l'inférence...")
     try:
         from utils.model import process_image
         from utils.gbif_api import get_species_id, get_species_image
@@ -113,10 +121,13 @@ def run_inference(self):
         self.last_reliable = reliable
         self.last_gbif_url = gbif_url
         try:
+            lang = get_lang()
             self.last_wikipedia_summary = wikipedia_search.summarize_wikipedia_page(
-                self.computed_insect_name
+                self.computed_insect_name, lang
             )
-        except Exception:
+            logger.info("Résumé Wikipédia récupéré.")
+        except Exception as e:
+            logger.warning(f"Impossible de récupérer le résumé Wikipédia: {e}")
             self.last_wikipedia_summary = None
 
         images = get_species_image(nub_id)
@@ -133,7 +144,7 @@ def run_inference(self):
         except Exception as e:
             logging.warning("Impossible d'enregistrer l'observation: %s", e)
 
-        self.display_results(results_data)
+        self.display_results(results_data, self.last_wikipedia_summary)
         self.main_view.api_images_container.display_images_async(images)
 
     except Exception as e:

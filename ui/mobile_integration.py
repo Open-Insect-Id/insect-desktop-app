@@ -1,18 +1,23 @@
 import os
 import logging
 from mobile_server.server import IMAGE_QUEUE
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def start_mobile_connect(self):
+    logger.info("Ouverture de la connexion mobile")
     # if window already exists, just bring to front
     if self.mobile_window and self.mobile_window.winfo_exists():
         self.mobile_window.lift()
+        logger.debug("Fenêtre mobile déjà ouverte, mise au premier plan")
         return
 
     try:
         from utils.mobile_connexion import MobileConnectionWindow
     except Exception as e:
-        logging.error("Cannot import mobile_connexion: %s", e)
+        logger.error(f"Impossible d'importer mobile_connexion: {e}")
         msg = (
             self.i18n.t("analysis_error")
             if hasattr(self, "i18n")
@@ -24,6 +29,7 @@ def start_mobile_connect(self):
     # instantiate window; it will start server itself
     self.mobile_window = MobileConnectionWindow(self)
     self.mobile_image_queue = IMAGE_QUEUE
+    logger.info("Fenêtre de connexion mobile ouverte")
     msg = (
         self.i18n.t("ready")
         if hasattr(self, "i18n")
@@ -42,10 +48,13 @@ def poll_mobile_queue(self):
                 break
 
             if os.path.exists(uploaded_image_path):
+                logger.info(f"Image mobile reçue: {uploaded_image_path}")
                 self.load_image_for_analysis(uploaded_image_path, source_label="mobile")
                 if not self.analyzing:
                     self.start_analysis()
             else:
-                logging.warning("Mobile upload path not found: %s", uploaded_image_path)
+                logger.warning(
+                    f"Chemin d'image mobile non trouvé: {uploaded_image_path}"
+                )
 
     self.after(500, lambda: poll_mobile_queue(self))
