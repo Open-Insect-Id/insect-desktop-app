@@ -100,7 +100,10 @@ def draw_largest_box(
         x1, y1, x2, y2 = box
         draw = ImageDraw.Draw(img)
         draw.rectangle([x1, y1, x2, y2], outline="red", width=10)
-        img.save("/tmp/detected_box.jpg")
+        temp_path = (
+            Path(tempfile.gettempdir()) / f"detected_box_{Path(image_path).stem}.jpg"
+        )
+        img.save(str(temp_path))
     if output_path:
         img.save(str(output_path))
     return img
