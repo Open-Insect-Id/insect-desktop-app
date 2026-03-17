@@ -423,7 +423,10 @@ def create_pdf_report(
             Paragraph("Barre", styles["table_header"]),
         ]
         rows = [header]
-        for level, name, conf, _ in results_data:
+
+        table_items = results_data[:4] if len(results_data) > 4 else results_data
+
+        for level, name, conf in table_items:
             rows.append(
                 [
                     Paragraph(level, styles["table_cell"]),
