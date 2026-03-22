@@ -61,12 +61,7 @@ CONTRIBUTORS = [
         "name": "Clovis",
         "icon": "https://avatars.githubusercontent.com/u/150185321?s=64&v=4",
         "url": "https://github.com/Elnix90",
-    },
-    {
-        "name": "Nathanael",
-        "icon": "https://avatars.githubusercontent.com/u/247614572?s=64&v=4",
-        "url": "https://github.com/NathanaelRBDev",
-    },
+    }
 ]
 
 # Dimensions

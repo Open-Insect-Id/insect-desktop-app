@@ -239,7 +239,7 @@ class Sidebar(ctk.CTkFrame):
 
         # Charger les icônes des contributeurs
         self.contributor_buttons = []
-        for i, contrib in enumerate(config.CONTRIBUTORS[:4]):  # Limiter à 4
+        for i, contrib in enumerate(config.CONTRIBUTORS[:3]):  # Limiter à 3
             try:
                 # Télécharger l'icône
                 resp = requests.get(contrib["icon"], timeout=10)
