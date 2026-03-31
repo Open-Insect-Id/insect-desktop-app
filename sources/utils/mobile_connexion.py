@@ -56,15 +56,15 @@ class MobileConnectionWindow(ctk.CTkToplevel):
 
         self.lbl_status = ctk.CTkLabel(
             self,
-            text="Mobile idle",
+            text="Server starting...",
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color=MOBILE_STATUS_IDLE_COLOR,
+            text_color="gray60",
         )
         self.lbl_status.pack(padx=20, pady=(0, 6))
 
         self.lbl_device = ctk.CTkLabel(
             self,
-            text="No device connected",
+            text="Waiting for connections",
             font=ctk.CTkFont(size=11),
             text_color="gray70",
         )
@@ -98,18 +98,26 @@ class MobileConnectionWindow(ctk.CTkToplevel):
     def refresh_status(self) -> None:
         """Periodically update connection labels based on runtime info."""
         if self.server_runtime:
-            info = self.server_runtime.get_connection_info()
-            if info.get("connected"):
+            # Vérifier d'abord si le serveur tourne
+            if not self.server_runtime.is_running:
                 self.lbl_status.configure(
-                    text="Mobile Connected", text_color=MOBILE_STATUS_CONNECTED_COLOR
+                    text="Server Error", text_color="#cf3838"
                 )
-                device = info.get("device_name") or "Unknown device"
-                self.lbl_device.configure(text=f"Device: {device}")
+                self.lbl_device.configure(text="Failed to start server")
             else:
-                self.lbl_status.configure(
-                    text="Mobile idle", text_color=MOBILE_STATUS_IDLE_COLOR
-                )
-                self.lbl_device.configure(text="No device connected")
+                # Serveur tourne, vérifier les connexions
+                info = self.server_runtime.get_connection_info()
+                if info.get("connected"):
+                    self.lbl_status.configure(
+                        text="Mobile Connected", text_color=MOBILE_STATUS_CONNECTED_COLOR
+                    )
+                    device = info.get("device_name") or "Unknown device"
+                    self.lbl_device.configure(text=f"Device: {device}")
+                else:
+                    self.lbl_status.configure(
+                        text="Server Ready", text_color="#d4a574"
+                    )
+                    self.lbl_device.configure(text="Waiting for mobile connection")
         self.after(MOBILE_POLL_INTERVAL_MS, self.refresh_status)
 
     def on_close(self) -> None:

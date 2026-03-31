@@ -56,12 +56,10 @@ def main():
     """
     Main, load the model and starts the app
     """
-    base = Path(__file__).parent
-
-    model_path = base / MODEL_PATH
-    hierarchy_path = base / HIERARCHY_PATH
-    labels_path = base / LABELS_PATH
-    obj_detector_path = base / OBJ_DETECTOR_MODEL_PATH
+    model_path = MODEL_PATH
+    hierarchy_path = HIERARCHY_PATH
+    labels_path = LABELS_PATH
+    obj_detector_path = OBJ_DETECTOR_MODEL_PATH
 
     # Charger le modèle synchroniquement au démarrage (souhait de l'utilisateur)
     try:

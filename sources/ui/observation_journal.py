@@ -35,15 +35,15 @@ def _open_file(path: str) -> None:
 
 def _load_placeholder_image(size=(86, 86)) -> ctk.CTkImage:
     """Load the SVG placeholder"""
-    base = os.path.dirname(__file__)
-    svg_path = os.path.join(base, "icons", "No-Image-Placeholder.svg")
+    import config
+    svg_path = config.PROJECT_ROOT / "sources" / "assets" / "icons" / "No-Image-Placeholder.svg"
 
     # Try to load the SVG using cairosvg if installed
     try:
         import cairosvg
 
         png_bytes = cairosvg.svg2png(
-            url=svg_path, output_width=size[0], output_height=size[1]
+            url=str(svg_path), output_width=size[0], output_height=size[1]
         )
         img = Image.open(io.BytesIO(png_bytes)).convert("RGBA")
         return ctk.CTkImage(light_image=img, dark_image=img, size=size)

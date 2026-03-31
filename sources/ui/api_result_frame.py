@@ -39,7 +39,7 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
             return
 
         # Show loading text + progress bar
-        loading_text = f"{self.i18n.t("loading_images")} (0/{len(images)})"
+        loading_text = f"{self.i18n.t('loading_images')} (0/{len(images)})"
         self.loading_label = ctk.CTkLabel(self, text=loading_text)
         self.loading_label.grid(
             row=0, column=0, columnspan=self._columns, padx=20, pady=(20, 5)
@@ -82,7 +82,7 @@ class ApiResultFrame(ctk.CTkScrollableFrame):
 
     def _update_loading_label(self, loaded: int, total: int):
         try:
-            loading_text = f"{self.i18n.t("loading_images")} ({loaded}/{total})"
+            loading_text = f"{self.i18n.t('loading_images')} ({loaded}/{total})"
             self.loading_label.configure(text=loading_text)
             if self.loading_bar:
                 self.loading_bar.set(min(max(loaded / total, 0.0), 1.0))

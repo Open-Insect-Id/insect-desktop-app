@@ -26,12 +26,23 @@ if [ ! -f requirements.txt ]; then
   exit 1
 fi
 
+# Créer le venv s'il n'existe pas
+if [ ! -d "venv" ]; then
+  print_info "Création de l'environnement virtuel..."
+  python3 -m venv venv
+  print_success "Environnement virtuel créé."
+fi
+
+# Activer le venv
+print_info "Activation de l'environnement virtuel..."
+source venv/bin/activate
+
 # Installer les dépendances
 print_info "Installation des dépendances..."
-python3 -m pip install --upgrade pip
-python3 -m pip install -r requirements.txt
+pip install --upgrade pip
+pip install -r requirements.txt
 print_success "Dépendances installées."
 
 # Lancer l'application
 print_info "Lancement de l'application..."
-python3 main.py
+python sources/main.py

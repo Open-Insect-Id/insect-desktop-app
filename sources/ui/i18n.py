@@ -22,10 +22,9 @@ class I18N:
         self.load_strings()
 
     def load_strings(self):
-        base_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "assets", "strings"
-        )
-        file_path = os.path.join(base_dir, f"{self.lang}.json")
+        import config
+        sources_dir = config.PROJECT_ROOT / "sources" / "assets" / "strings"
+        file_path = sources_dir / f"{self.lang}.json"
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 self.strings = json.load(f)

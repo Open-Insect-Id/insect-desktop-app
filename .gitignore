@@ -52,8 +52,9 @@ logs/
 Thumbs.db
 .DS_Store
 
-/mobile_server/uploads
-observations.db
+/sources/mobile_server/uploads
 
-# Settings database, it is created on first run
-utils/settings.db
+# Data directory
+/data/observations.db
+/data/settings.db
+/data/images/

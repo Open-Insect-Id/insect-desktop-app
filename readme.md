@@ -58,7 +58,7 @@ Open Insect ID est une application desktop qui permet d'identifier les insectes 
 
 5. **Lancez l'application :**
    ```bash
-   python main.py
+   python sources/main.py
    ```
 
 ## 📖 Utilisation
@@ -74,4 +74,4 @@ Open Insect ID est une application desktop qui permet d'identifier les insectes 
 
 ## 📄 Licence
 
-Ce projet est sous licence GPLv3 — voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet est sous licence GPLv3 — voir le fichier [licence.txt](licence.txt) pour plus de détails.

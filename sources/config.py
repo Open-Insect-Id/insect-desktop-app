@@ -75,7 +75,10 @@ IMAGE_SIZE = {"preview_width": 400, "preview_height": 400}
 # Modèle
 MODEL = {"input_size": (224, 224), "default_input_size": (224, 224)}
 
-MODELS_DIR = Path("assets/models")
+PROJECT_ROOT = Path(__file__).parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
+
+MODELS_DIR = DATA_DIR / "models"
 CLASSIFIER_MODEL_DIR = MODELS_DIR / Path("classifier")
 OBJ_DETECTOR_MODEL_DIR = MODELS_DIR / Path("obj_detector")
 
@@ -88,7 +91,7 @@ DEFAULT_PATHS_IMAGES = [
     os.path.expanduser("~/Downloads"),
     os.path.expanduser("~/Pictures"),
     os.path.expanduser("~/Documents"),
-    Path(Path(__file__).parent / Path("assets/images")),
+    DATA_DIR / "images",
 ]
 
 # Par défaut, on peut utiliser le dernier dossier de la liste (images dans le projet)
@@ -117,7 +120,7 @@ LOGGING_LEVEL_LOGFILES: int = 5  # Verbose
 LOGS_DIR = Path("logs")
 
 # Base database used to store user analysis history (journal d'observation)
-OBSERVATION_DB_PATH = Path("observations.db")
-SETTINGS_DB_PATH = Path("settings.db")
+OBSERVATION_DB_PATH = DATA_DIR / "observations.db"
+SETTINGS_DB_PATH = DATA_DIR / "settings.db"
 
 LOGS_CONSOLE_GLOBALLY = True

@@ -20,4 +20,4 @@ if not exist requirements.txt (
 
 pip install --user -r requirements.txt
 
-python main.py
+python sources/main.py

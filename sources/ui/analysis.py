@@ -50,6 +50,10 @@ def load_image_for_analysis(self, image_path, source_label):
     self.update_clear_btn()
     msg = self.i18n.t("ready")
     self.update_status(msg)
+    
+    if crop_choice is not None:
+        logger.info("Démarrage automatique de l'analyse après choix du recadrage")
+        self.after(500, self.start_analysis)
 
 
 def start_analysis(self):

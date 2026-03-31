@@ -8,7 +8,6 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
-from venv import logger
 
 from flask import Flask, jsonify, render_template, request
 from PIL import Image
@@ -168,6 +167,7 @@ class MobileServerRuntime:
 
         @flask_app.route("/status", methods=["GET"])
         def status():
+            self._mark_connection(extract_device_name_from_request())
             return jsonify({"app_name": APP_NAME, "device_name": self.host_device_name}), 200
 
         return flask_app
@@ -182,7 +182,8 @@ class MobileServerRuntime:
         with self._connection_lock:
             has_recent_connection = False
             if self._last_connection_time is not None:
-                elapsed = (datetime.now() - self._last_connection_time).total_seconds()
+                # Utiliser utcnow() pour cohérence avec _mark_connection
+                elapsed = (datetime.utcnow() - self._last_connection_time).total_seconds()
                 has_recent_connection = elapsed <= CONNECTION_TIMEOUT_SECONDS
 
             return {

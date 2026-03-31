@@ -16,10 +16,11 @@ import config
 
 def get_db_path() -> Path:
     """Return the configured path to the observation database."""
-    # Default to a local file in the project root, but allow override from config
+    # Default to a local file in the data directory, but allow override from config
     if hasattr(config, "OBSERVATION_DB_PATH"):
         return Path(config.OBSERVATION_DB_PATH)
-    return Path("observations.db")
+    project_root = Path(__file__).parent.parent.parent
+    return project_root / "data" / "observations.db"
 
 
 def init_observation_db() -> None:
