@@ -50,8 +50,6 @@ def poll_mobile_queue(self):
             if os.path.exists(uploaded_image_path):
                 logger.info(f"Image mobile reçue: {uploaded_image_path}")
                 self.load_image_for_analysis(uploaded_image_path, source_label="mobile")
-                if not self.analyzing:
-                    self.start_analysis()
             else:
                 logger.warning(
                     f"Chemin d'image mobile non trouvé: {uploaded_image_path}"
