@@ -34,6 +34,7 @@ class MobileConnectionWindow(ctk.CTkToplevel):
         self.server_runtime: MobileServerRuntime | None = None
         self.image_queue = IMAGE_QUEUE
         self.qr_image_tk = None
+        self.i18n = getattr(parent, "i18n", None)
 
         self._build_widgets()
         self.start_server()
@@ -53,6 +54,20 @@ class MobileConnectionWindow(ctk.CTkToplevel):
             text_color="gray60",
         )
         self.lbl_hint.pack(padx=20, pady=(0, 12))
+
+        # Disclaimer about network requirement (after QR code)
+        disclaimer_text = (
+            self.i18n.t("mobile_network_disclaimer")
+            if self.i18n
+            else "Computer and phone must be\nconnected to the same Wi-Fi network."
+        )
+        self.lbl_disclaimer = ctk.CTkLabel(
+            self,
+            text=disclaimer_text,
+            font=ctk.CTkFont(size=9),
+            text_color="#f4a261",
+        )
+        self.lbl_disclaimer.pack(padx=20, pady=(12, 12))
 
         self.lbl_status = ctk.CTkLabel(
             self,
