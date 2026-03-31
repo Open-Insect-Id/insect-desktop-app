@@ -63,6 +63,5 @@
   "ambiguous": "Ambiguous",
   "negative": "Unreliable",
   "analysis_success": "Analysis successful!",
-  "no_wikipedia_summary": "No Wikipedia summary available.",
-  "mobile_network_disclaimer": "Computer and phone must be\nconnected to the same Wi-Fi network."
+  "no_wikipedia_summary": "No Wikipedia summary available."
 }
