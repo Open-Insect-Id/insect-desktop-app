@@ -91,7 +91,7 @@ DEFAULT_PATHS_IMAGES = [
     os.path.expanduser("~/Downloads"),
     os.path.expanduser("~/Pictures"),
     os.path.expanduser("~/Documents"),
-    DATA_DIR / "images",
+    PROJECT_ROOT / "images",
 ]
 
 # Par défaut, on peut utiliser le dernier dossier de la liste (images dans le projet)
